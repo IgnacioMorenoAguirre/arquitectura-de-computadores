@@ -1,0 +1,7 @@
+# Dependencias de Node (se regeneran con: npm install docx)
+node_modules/
+
+# Basura del sistema operativo
+Thumbs.db
+desktop.ini
+.DS_Store
