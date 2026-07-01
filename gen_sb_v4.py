@@ -62,13 +62,19 @@ seg([(465, 296), (533, 296)]); tip((525, 296), (533, 296))
 seg([(465, 344), (492, 344)], color=(120, 170, 120, 255), w=3)
 
 # 7. Read data 2 ($t1) -> Data memory Write data  (CAMINO DE STORE, clave; pasa por ARRIBA de ALU control)
-seg([(465, 344), (465, 400), (640, 400)]); tip((632, 400), (640, 400))
+seg([(465, 344), (474, 344), (474, 400), (640, 400)]); tip((632, 400), (640, 400))
 
 # 8. Sign-extend (offset=0) -> MUX ALUSrc input 1 (SELECCIONADA, ALUSrc=1)
 seg([(429, 446), (476, 446), (476, 380), (493, 380)]); tip((485, 380), (493, 380))
 
 # 9. MUX ALUSrc -> ALU segundo operando
 seg([(517, 361), (533, 361)]); tip((525, 361), (533, 361))
+
+# 10. Control: ALUOp -> ALU control (codigo que le dice "sumar")
+seg([(405, 210), (466, 210), (466, 516), (530, 516), (530, 486)]); tip((530, 494), (530, 486))
+
+# 10b. Control: ALUSrc -> selector del MUX (ALUSrc=1, activo)
+seg([(405, 220), (503, 220), (503, 335)]); tip((503, 343), (503, 335))
 
 # 11. ALU result -> Data memory Address
 seg([(612, 338), (640, 338)]); tip((633, 338), (640, 338))
@@ -92,13 +98,12 @@ rt_text((198, 291), "$t1 01001", fsig)      # rt = $t1 (dato a guardar)
 rt_text((198, 465), "0000...0", frs)        # inmediato (offset)
 rt_text((595, 325), "$t0+0", frs)           # direccion calculada por la ALU
 rt_text((605, 415), "$t1", fr)              # dato escrito en memoria
-rt_text((442, 198), "00", fsig)             # ALUOp
-
-# señales de control (a la derecha de sus etiquetas, misma fila que el texto azul)
-sig_vals = [("X", 139), ("0", 154), ("0", 168), ("X", 183),
-            ("00", 198), ("1", 213), ("1", 228), ("0", 242)]
-for v, y in sig_vals:
-    d.text((445, y), v, fill=RED, font=fsig, anchor="lm")
+# señales de control (a la derecha de sus etiquetas; MemWrite y ALUSrc se corren
+# en x porque ahi pasan los cables reales de ALUOp y ALUSrc hacia sus destinos)
+sig_vals = [("X", 139, 445), ("0", 154, 445), ("0", 168, 445), ("X", 183, 445),
+            ("00", 198, 445), ("1", 213, 478), ("1", 228, 512), ("0", 242, 445)]
+for v, y, x in sig_vals:
+    d.text((x, y), v, fill=RED, font=fsig, anchor="lm")
 
 result = Image.alpha_composite(base, ov).convert("RGB")
 
