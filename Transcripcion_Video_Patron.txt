@@ -1,0 +1,367 @@
+[00:01] Hola profesor, el siguiente video es sobre la presentación de un radio semestral hecho en MIBS, ¿cómo?
+[00:07] Yo soy Cristian Colil.
+[00:08] Yo soy Matías Urrutia.
+[00:11] Y yo Francisco Luna.
+[00:12] El contexto del código, este se va a encargar de registrar participantes y espectadores para un amaratón.
+[00:22] Estos participantes y espectadores pueden registrarse obteniendo un rol específico para el amaratón
+[00:30] utilizando su root 100 puntos y con yon.
+[00:32] Solamente van a ser registrados a los participantes o espectadores que ingresen su root de manera correcta.
+[00:38] A esto nos referimos con que el código verificador que coloquen sea el correspondiente a su root.
+[00:42] Luego de esto, los participantes y espectadores serán pasados a un arreglo de manera diferente donde se van a guardar sus respectivos roles.
+[00:53] La sintetía positiva podemos observar el código ya compilado en high level language y low level language.
+[01:00] En el lenguaje de alto nivel podemos observar ya cada código compilado en C
+[01:06] y contiene todo lo que mencioné anteriormente el menú para seleccionar la opción de si ser participante o espectador.
+[01:14] Una opción para desplegar la lista y la opción 4 para salirnos del programa.
+[01:20] Si vemos en el otro partado en low level language tenemos el mismo menú para ser participantes o espectadores
+[01:27] desplegar la lista y salir del programa por lo cual se puede ver que funcionan de la misma forma.
+[01:35] Primero enseñaremos el código de high level language donde se utilizó el programa de C++, se utilizó el lenguaje C
+[01:43] y el código cuenta con 186 líneas de código.
+[01:48] Este es un pequeño fragmento de lo que tenemos de en el código C, es decir, en el high level language.
+[01:54] En este caso seleccionamos esta sección de código porque contenía cada una de las sentencias pedidas.
+[02:00] Cabe destacar que cada uno de estos requerimientos los vamos cumpliendo muchas veces durante el código.
+[02:06] Este es solamente a modo de ejemplo.
+[02:08] Bueno, primero tenemos una introducción declarativa y con asignación que es el intp igual 0
+[02:18] la declaración está en el intp y la asignación está en el p igual 0.
+[02:24] La repetición.
+[02:26] Estamos haciendo uso de un do while que es para que se pueda repetir el menú las veces que el usuario de C o el arreglo se rellene.
+[02:39] También tenemos de selección donde utilizamos este switch.
+[02:44] También hay otro switch en otra sección del código.
+[02:48] Tenemos operaciones matemáticas muy abundantemente en el código, pero en este fragmento está el p++ que es igual a un p igual p++.
+[03:00] Y una invocación de función que aquí ya se pueden apreciar más
+[03:05] que es invocando la función cálculo que va con la variable root.
+[03:13] No vamos a dar más enfoque al high level language porque creemos que el low level language en esta presentación tiene más valor.
+[03:24] Por ende cualquier duda puede hacernosla y en el mismo archivo que mandamos este video va a estar el código en C.
+[03:33] Ya, pasamos a la parte de low level language donde lo voy a mostrar el código sistema en MIPS.
+[03:39] Ya lo hicimos en el nombrador Mars 4.5 como es el nombre anteriormente,
+[03:42] lenguaje es hambreador y este cuesta de 300 sentidos al línea de código.
+[03:46] Y este cumple exactamente lo mismo que el de lenguaje C en el cual tenemos nuestro main,
+[03:53] un repeat que es como un ciclo while en este caso.
+[03:56] Este es como una asignación también, también tenemos.
+[04:00] Estos son los datos que van a hacerlo del switch en el programa este
+[04:08] y también tenemos funciones dentro de este código el cual van a retornar valores.
+[04:14] Por ejemplo, aquí en la función largo va a retornar el largo del root y lo va a mover a ese 1.
+[04:20] Y abajo les voy a mostrar las funciones.
+[04:23] Aquí está por ejemplo la que es un hambre que es largo, ya, largo función que retorna aquí
+[04:29] y como aquí se puede ver guarda un espacio en el stack.
+[04:33] Y más adelante lo va a hacer un paro retornado y el stack lo llevará a la memoria.
+[04:40] Pasando al apartado del mapeo, tenemos esta introducción de tipo R que es un AD.
+[04:47] Para verla mejor nos vamos a ir acá al código que es el código que mostro a mi compañero anteriormente
+[04:52] en el cual podemos observar que es la línea 96 la que me encargaré de mapear.
+[04:57] Podemos ver que pesos T1 es la dirección base de un arreglo
+[05:02] y que pesos T3 es un desplazamiento.
+[05:04] Con lo cual este AD se encarga de asomar la dirección base de un arreglo más un desplazamiento.
+[05:08] Y esto se encarga de acá esta función de desplegar el arreglo de los participantes.
+[05:13] Pasando al mapeo, partiríamos de acá de nuestro program counter
+[05:18] que tiene la dirección actual de mi instrucción.
+[05:20] Esto se va a meter por acá al instruccio memory.
+[05:23] Va a leer la dirección de esta instrucción y mi instrucción de 32 bits va a salir por acá
+[05:28] y comenzará a deglasarse en varias instrucciones con sus respectivos bits.
+[05:35] Ah, sí.
+[05:38] Listo.
+[05:39] La instrucción de más arriba podemos observar que se está trabajando con 6 bits
+[05:45] y esta se encarga del opcode
+[05:49] el cual en este caso tipo R van a ser 6 zeros.
+[05:54] 6 zeros.
+[05:55] ¿Qué hace este opcode? Le avisa a mi unidad de control
+[05:58] con qué tipo de instrucción estamos trabajando.
+[06:00] En este caso con una de tipo R.
+[06:02] Entonces, sabemos que vamos a trabajar con registro.
+[06:04] La unidad de control activa esto.
+[06:06] También el aluop va a enviar un 1 o 0 hacia mi alu control.
+[06:12] Esto va a enviar un 1 y un 0.
+[06:14] Y en otro recto CT también estarás activado de esta forma.
+[06:18] Por acá.
+[06:20] Por acá va a activar este multiplexor.
+[06:23] Y esto es el por acá.
+[06:26] Y esto va a quedar así porque queríamos escribir en un registro luego.
+[06:29] Ya, en nuestra instrucción de este lado de acá
+[06:33] podemos observar que estamos trabajando con 5 bits.
+[06:39] Los cuales son 0 1 0 0 1
+[06:45] y esta instrucción de acá van a entrar por acá.
+[06:49] Nos vamos a estar refiriendo a pesos de 1.
+[06:53] Y va a quedar almacenado acá.
+[06:55] Va a quedar guardado la dirección de este registro.
+[06:59] Luego acaba a ocurrir algo similar.
+[07:02] Tenemos los siguientes bits 0 1 0 1 1.
+[07:07] Vamos a entrar acá a la cajita de registro.
+[07:10] Vale el registro 2 que va a ser, se va a referir a pesos de 3.
+[07:14] La dirección de pesos de 3.
+[07:16] Y más acá abajo en la instrucción de acá
+[07:20] que también vemos que está trabajando con 5 bits.
+[07:23] Va a entrar lo siguiente.
+[07:24] 0 1 0 0 1
+[07:28] Esta se va a encargar acá al de guardar
+[07:32] la dirección de este registro para que luego se escriba un dato sobre ella.
+[07:38] Ya, siguiendo por acá tenemos que la instrucción sigue por acá, cierto?
+[07:43] Se va por acá abajo.
+[07:45] Y acá podemos observar que nuevamente volvemos a trabajar con 6 bits.
+[07:48] Estos 6 bits se encargan de decirle a la alu control
+[07:53] qué función vamos a utilizar.
+[07:55] En este caso se va a enviar la función suma, que es 1 y 5 0s.
+[08:00] Esto le va a avisar a la alu control, más la señal que va a enviar la alu control
+[08:06] hacia esta aluda acá arriba, que la señal viene a ser 0 0 1 0.
+[08:11] Le va a avisar a esta alu que debe sumar esta aluda acá.
+[08:16] Ya luego, cuando estén leídas las direcciones de los registros,
+[08:21] acá van a entrar los datos de estas direcciones.
+[08:24] Van a entrar por acá.
+[08:26] Este multiplexor va a estar apagado por acá.
+[08:29] Entonces, ahora en esta alu se van a operar los datos de los registros
+[08:36] que ya fueron leídos en la caja de registros.
+[08:38] Nos vamos por acá.
+[08:40] Por acá, por acá.
+[08:44] Este multiplexor también va a estar apagado,
+[08:46] ya que estamos en un tipo R y esto MmTurret está en 0.
+[08:51] Nos vamos por acá.
+[08:54] Vamos a volver hasta este lado.
+[08:57] Y finalmente llegará el gray data para escribir en el registro que estaba acá,
+[09:02] que se refería a pesos de 3 desde este lado.
+[09:05] Se va a escribir el dato que resultó de la operación de estos dos registros.
+[09:13] Para finalizar el mapeo, tenemos que nuestro program counter de acá.
+[09:18] Se va a ir por acá arriba.
+[09:20] Ya está la luz muy importante, ya que se encarga de sumar siempre 4 bytes.
+[09:25] 4 bytes.
+[09:26] Esta aluda acá va a sumar 4.
+[09:28] Se va a ir por acá, porque va a sumar 4 para prepararlo para la siguiente instrucción.
+[09:32] Sabemos que nos estábamos utilizando saltos.
+[09:35] El tipo R es nuestra instrucción.
+[09:37] Entonces, esto no se utiliza.
+[09:39] Acá este multiplexor va a estar apagado.
+[09:41] 0.
+[09:42] Sacule por acá.
+[09:44] Llega acá.
+[09:46] Y terminamos acá, que nuestra instrucción ya está preparada para la siguiente dirección.
+[09:54] Una vez que ya les voy a mostrar el mapeo hecho a mano,
+[09:57] acá se puede observar el mapeo de lo que acabo de hacer de mejor manera.
+[10:02] Y también con toda la información en la que hacía referencia.
+[10:07] Se puede observar de mejor manera.
+[10:09] Y también acá, en la siguiente diapositiva, podemos observar el mapeo,
+[10:13] pero ya hecho con la herramienta del Mars que es el X-ray.
+[10:17] Y podemos observar que ocurre todo lo que mencionaba anteriormente también.
+[10:21] Acá podemos ver también el 1.0 que sale de ALU UP a la ALU CONTROL.
+[10:26] Vamos a ver este cable rojito de acá, que está prendido.
+[10:30] Y este que está en 0, o sea, este que está apagado, queda en 0.
+[10:33] Entonces, este es el que manda el 1 y el 0 a nuestra ALU CONTROL.
+[10:37] Ahora, les voy a presentar lo que es LoadBit.
+[10:40] Una introducción de tipo I, la cual busca desde la memoria un dato de 1 byte, es decir, 8 bits.
+[10:49] Es muy parecido a lo que es LoadWord, pero el LoadWord lo que hace es buscar un dato de 32 bits.
+[10:56] Bueno, partimos este datapad con la introducción 0x00400250.
+[11:13] Esta es la línea de código 202 de nuestro código en MIPS, en código Assembler.
+[11:20] Bueno, leemos lo que es la dirección y el IntroductionMemory nos va a dar los 32 bits.
+[11:27] Los primeros, del 31 al 26, los 6 bits nos dan un opcode de 1.0.0.0.
+[11:36] Siguiente, nos da una introducción que esté 1,
+[11:42] donde vamos a buscar y hacer el desplazamiento con offset 0.
+[11:49] También vamos a dejar lo que es el registro donde vamos a guardar, que también esté 1.
+[11:58] Y bueno, cabe destacar que por tener al opcode 1.0.0.0.0.
+[12:03] Tenemos que el memgrid está prendido, ALU-CRC está prendido.
+[12:10] Memgrid está apagado porque no queremos escribir en la memoria.
+[12:16] La europea nos da un 00 y claramente queremos desde la memoria un registro.
+[12:23] O sea, pasar un dato desde la memoria un registro, así que encendido.
+[12:27] Vamos a leer la memoria así que también un 1.
+[12:31] Branch va a estar en 0 porque no hay desplazamiento ni condicional ni incondicional.
+[12:36] Y reg de ST también va a estar en 0 porque no hay un segundo registro.
+[12:40] Entonces queremos que pase este como el de escritura.
+[12:44] Entonces, también pasa hacia acá el 6 bits,
+[12:51] pero como este, esta reg de ST está apagado, pasa este.
+[12:58] El great register, donde vamos a escribir el dato que nos va a traer de la memoria.
+[13:04] Bueno, estos 16 bits, ah bueno, de aquí también pasan,
+[13:08] pero como en este multiplexor está en 0 y no hay 1,
+[13:12] pasa al de arriba, así que en este caso no tiene sentido este paso.
+[13:19] Estos 16 bits en el sing extent, que en esta instrucción es el offset,
+[13:25] son 16 bits con puro 0 porque nuestro offset es 0, es el inmediato.
+[13:31] El sing extent lo que hace es extender esta instrucción
+[13:35] y lo que hace es pasarla de 16 bits, rellenarlo con puro 0 y que nos den 32 bits.
+[13:41] También pase hacia acá arriba, hacia acá,
+[13:45] pero como no tiene sentido en esta instrucción porque no hay un branch,
+[13:52] no voy a tirar la línea hacia arriba.
+[13:56] Aquí hay una instrucción de 6 bits el cual da igual lo que mande,
+[14:03] pero en este caso manda solamente 6 zeros.
+[14:08] Bueno, la alu p como bien dije está en 0, 0,
+[14:12] así que manda a la alu control 1, 0, 0
+[14:17] y combinando estas dos nos da que hacia la alu control
+[14:22] manda a la alu 1, 0, 0, 1, 0, el cual interpreta como una suma.
+[14:29] Esta suma es el desplazamiento que se hace en el arreglo.
+[14:37] Aquí está el arreglo, pasa inmediatamente a la alu,
+[14:41] aquí como alu CRC está encendido pasa el de abajo,
+[14:46] aquí se hace el desplazamiento en el arreglo,
+[14:51] pero como el offset es 0 no hay desplazamiento como tal,
+[14:55] porque el desplazamiento se hace en el ad, ok?
+[14:59] Ya, aquí pasa, memgrade está apagado,
+[15:04] pero en cambio memred está prendido, este está prendido.
+[15:09] También se va hacia abajo, pero como memtorreg está prendido,
+[15:14] está encendido, pasamos.
+[15:16] Entonces la dirección nos da, nos lee un dato
+[15:21] y este dato de 8 bits pasa aquí, el multiplexor dice que está en 1,
+[15:29] así que inmediatamente mandamos el dato de 8 bits a la escritura,
+[15:36] el cual era el T1.
+[15:39] Aquí al mismo tiempo, estamos haciendo hacia acá arriba,
+[15:44] al mismo tiempo de lo que está pasando abajo,
+[15:46] hacemos que esta dirección de memoria se le sume 4,
+[15:50] se le suma 4, un ad, ok?
+[15:53] Aquí subimos y como el branch está en 0 como anteriormente dije,
+[15:59] el sentido es que pase por acá arriba,
+[16:02] pero sí pasa por acá, ok?
+[16:04] Aquí, pero como está en 0, aquí no pasa,
+[16:09] bueno como está en 0 se devuelve y que llega aquí,
+[16:14] llega esta instrucción, o sea, esta dirección de memoria,
+[16:18] más 4, o sea, en vez de terminar en 250,
+[16:22] termina en 254.
+[16:24] Y aquí está lo que anteriormente les comentaba,
+[16:29] esta es lo que hice en Paint,
+[16:32] el opcode era 1, 0, 0, 0, 0,
+[16:35] el rs y el rt, como el donde se escribe el dato este 1
+[16:41] y donde está el root también era un t1,
+[16:45] los bits son los mismos,
+[16:48] el salto inmediato como es 0 son puro 0,
+[16:51] son 16 bits de 0,
+[16:53] esta es la opción de que Riken nos da Mars,
+[16:58] en este caso como podemos ver el opcode de Loadbyte
+[17:02] es 1, 0, 0, 0, 0,
+[17:05] pero cuando nosotros acercamos a la unidad de control
+[17:08] nos dice que está entrando 1, 0, 0, 0, 1, 1,
+[17:12] esta con la investigación que hicimos es que
+[17:16] es el opcode del Loadword,
+[17:19] el Loadword y Loadbyte tienen distintos opcode,
+[17:24] porque se utiliza para cargar distintos tamaños de datos,
+[17:27] como el Loadword hace palabras completas
+[17:31] y Loadbytes individuales,
+[17:33] sin embargo la unidad de control está diseñada
+[17:36] para gestionar estas diferencias
+[17:38] y ejecutar las operaciones correctas
+[17:40] según la instrucción que se esté utilizando,
+[17:43] por eso en este caso la interpreta así
+[17:47] para que correctamente salgan estas opciones
+[17:51] de la unidad de control.
+[17:54] Ya, pasando la siguiente instrucción
+[17:57] que vamos a explicar es el BQZ,
+[18:00] como lo podemos ver en nuestro programa,
+[18:03] BQZ está en la línea 326,
+[18:06] y este BQZ es lo que hace una condición de salida
+[18:09] de este loop que está aquí en la función largo,
+[18:12] el cual hace que al haber un byte nulo
+[18:15] va a salir de este loop
+[18:18] y iría hacia salida.
+[18:21] Ya, con referencia me ha peido el BQZ,
+[18:24] primero hay que tomar en cuenta que el BQZ es equivalente a un BQ,
+[18:28] por lo cual esto es como que se compara el BQZ-T1
+[18:32] con el 0, si 0,
+[18:36] 0 y nos dirige hacia salida.
+[18:42] Ya, empezamos de aquí en el programa counter
+[18:46] y vamos a Instruction Memory
+[18:49] donde vamos a cargar nuestra instrucción
+[18:51] y va a salir por aquí y se va a desplegar.
+[18:53] Por arriba entrará la 16 bytes,
+[18:56] lo cual le corresponde a 0, 0, 0, 1,
+[18:59] 0, 0, lo cual le dice a un unidad de control
+[19:02] que ejecute la instrucción tipo BQ.
+[19:05] Y la unidad de control va a hacer que por alo up
+[19:09] salga un 0 y un 1,
+[19:12] 0, 1, que le hace decir al alo control
+[19:16] que le llega a la alo a red una señal
+[19:19] que es 0, 1, 1, 0, que debe restar.
+[19:23] También se prende el branch
+[19:26] y eso más nada.
+[19:30] Y tomando en contacto a eso,
+[19:32] los valores que tomen el Racket DST
+[19:34] son Don't Care, ya que no vamos a trabajar
+[19:36] sobre registros, o sea, no vamos a escribir sobre 1
+[19:38] y tampoco vamos a trabajar sobre data memory,
+[19:41] así que el memture también tuvo valores Don't Care.
+[19:44] Y asigiendo por aquí, en red de registro 1
+[19:47] entraría el peso este 1
+[19:49] que corresponde a la dirección 0, 1, 0, 0, 1
+[19:53] y su dato correspondiente salió por aquí hacia la alu.
+[19:56] Después, por aquí entran 5 bytes
+[19:59] más correspondiente al 0, que serían 5, 0s
+[20:04] y por red data 2
+[20:07] pasa por aquí y entra por el multiplicador
+[20:09] sin problemas que está pagado hacia la alu.
+[20:11] Después por aquí abajo
+[20:13] por aquí viene el salto relativo al program counter
+[20:16] el cual es de 16 bits y sería
+[20:19] 14, 0s, 1 y 1
+[20:23] y esto dice que 16 bits se extienden a 32 bits
+[20:26] de qué forma agarra todo esto
+[20:28] y lo extiende con puro 0 hacia la izquierda desde acá
+[20:31] después entra por aquí para seguir siendo operado
+[20:35] y le hace un Shift Left 2
+[20:38] ¿Qué es esto? Que lo multiplica por 4
+[20:41] o en relación a los bits lo que hace un 9
+[20:44] los bits 2 posicionan hacia la izquierda
+[20:46] por lo tanto nos quedan 28 0s
+[20:49] 1, 1, 0, 0
+[20:52] y todo eso entraría por aquí
+[20:55] volviendo a la alu
+[20:57] tenemos que arrester la respuesta
+[21:00] de este sale por aquí y qué hace este
+[21:02] se pregunta la respuesta es 0
+[21:04] si es así prende este cable de aquí
+[21:07] y entra al LANZ y con el LANZ con 1 y 1
+[21:10] hace que el multiplicador se prenda
+[21:13] en caso contrario que eso un número positivo o negativo
+[21:16] no es igual a 0 así que este no se aprende
+[21:18] por lo tanto el LANZ no complica la condición
+[21:21] y eso no se prende
+[21:23] dejémosle caso que se prenda
+[21:26] aquí volviendo al Prog-on-conter
+[21:28] la instrucción actual sube por aquí
+[21:32] y le sumamos 4 bytes a esa dirección de la instrucción
+[21:35] para pasar a la siguiente instrucción
+[21:38] pero al llegar a esta parte
+[21:40] se ha ido a dos caminos
+[21:42] el primero es que entra al alu
+[21:44] y le suma el salto relativo al Prog-on-conter
+[21:48] y saldría por aquí
+[21:50] eso es cuando se cumple la condición
+[21:52] y al venir para acá
+[21:54] hace que Prog-on-conter el salto a la línea salida
+[21:58] caso contrario que no se cumple
+[22:00] este sigue el camino por acá
+[22:03] como el multiplicador está apagado
+[22:05] pasa sin problema
+[22:07] y volver acá hace que desarte a la siguiente instrucción
+[22:11] volviendo a nuestra diapo
+[22:14] pasando al siguiente
+[22:16] tenemos todo bien explicado
+[22:18] con línea y todo
+[22:20] como se riza cada cosa
+[22:22] con los bits de entrada y salida
+[22:24] y también tenemos el mapeón de Q-Ride
+[22:26] desde el Mars
+[22:28] aquí vemos que nos dio igualito
+[22:30] y también se puede ver que aquí
+[22:32] el BQ-Z es equivalente al
+[22:34] lo que expliqué
+[22:36] que se compara al 0 con T1
+[22:38] y hace un salto relativo de 3
+[22:41] es un día que tiene que ser 3 líneas
+[22:44] más 4 para llegar a la etiqueta de salida
+[22:48] y aquí está también lo explicado
+[22:50] lo del ALU
+[22:52] y que se prende el blanche
+[22:54] lo demás no está apagado
+[22:58] para finalizar con nuestra presentación
+[23:00] como grupo estamos
+[23:02] muy satisfechos con el resultado
+[23:04] de nuestro proyecto en MIPS
+[23:06] ya que durante el proceso de este mismo
+[23:08] aplicamos el conocimiento
+[23:10] de la asignatura
+[23:12] de manera
+[23:14] de buena manera
+[23:16] y también fui mampiando nuestro conocimiento
+[23:18] mediante investigaciones que hicimos por internet
+[23:22] uno de los aspectos más interesantes como grupo
+[23:24] fue entender como opera el hardware
+[23:26] de manera lógica
+[23:28] y también una reflexión importante
+[23:30] sobre el avance tecnológico
+[23:32] ya que
+[23:34] es pensar que hace
+[23:36] unas décadas se tenía que
+[23:38] programar de esta forma y que
+[23:40] hoy en día ya tengamos todo este tipo de
+[23:42] tecnología al acceso
+[23:44] de todo y como este ha ido evolucionando
+[23:46] nos parece muy asombroso
+[23:50] y esta ha sido nuestra presentación
+[23:52] muchas gracias

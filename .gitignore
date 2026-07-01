@@ -5,3 +5,6 @@ node_modules/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Video del profe (179 MB, supera el limite de GitHub) - descargar de su Drive
+*.mp4

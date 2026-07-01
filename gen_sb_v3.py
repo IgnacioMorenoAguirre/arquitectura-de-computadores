@@ -75,10 +75,10 @@ except:
 def rt(xy, txt, font=fr):
     d.text(xy, txt, fill=RED, font=font, anchor="lm")
 
-rt((200,100), "101000")        # opcode sb
-rt((296,160), "$t0", frs)      # read register 1
-rt((296,182), "$t1", frs)      # read register 2 (dato a guardar)
-rt((300,236), "0", frs)        # inmediato (offset)
+rt((196,98), "101000", frs)    # opcode sb (binario)
+rt((290,158), "$t0  01000", frs)   # rs = $t0 (binario)
+rt((290,180), "$t1  01001", frs)   # rt = $t1 (binario, dato a guardar)
+rt((290,236), "0000...0", frs)     # inmediato (offset) en binario
 rt((596,176), "$t0+0", frs)    # ALU calcula direccion
 rt((548,258), "00", frs)       # ALUOp
 rt((640,305), "$t1", fr)       # dato escrito en memoria
@@ -120,7 +120,7 @@ td.text((40, ty+16), "sb  $t1, 0($t0)", fill=(0,0,0), font=fi, anchor="lm")
 # tabla 2 filas: campos / rangos
 tx0, twid = 40, 760
 cols = [40, 290, 450, 600, 800]
-r1 = ["opcode (101000)", "rs", "rt", "Inmediato"]
+r1 = ["opcode  101000", "rs  01000", "rt  01001", "inmediato 0...0"]
 r2 = ["31:26",           "25-21","20-16","15-0"]
 top = ty+32
 for ri,row in enumerate([r1,r2]):
