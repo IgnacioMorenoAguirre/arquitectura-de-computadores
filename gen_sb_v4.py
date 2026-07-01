@@ -52,6 +52,8 @@ seg([(183, 280), (334, 280)]); tip((326, 280), (334, 280))
 seg([(183, 314), (338, 314)]); tip((330, 314), (338, 314))
 # offset [15-0] -> Sign-extend
 seg([(183, 446), (336, 446)]); tip((328, 446), (336, 446))
+# funct [5-0] -> ALU control (rodea por debajo del Sign-extend y sube al costado izquierdo del circulo)
+seg([(337, 446), (337, 508), (498, 508), (498, 450)]); tip((498, 458), (498, 450))
 
 # 5. Read data 1 ($t0) -> ALU (primer operando)
 seg([(465, 296), (533, 296)]); tip((525, 296), (533, 296))
@@ -59,8 +61,8 @@ seg([(465, 296), (533, 296)]); tip((525, 296), (533, 296))
 # 6. Read data 2 ($t1) -> MUX ALUSrc input 0 (no seleccionada)
 seg([(465, 344), (492, 344)], color=(120, 170, 120, 255), w=3)
 
-# 7. Read data 2 ($t1) -> Data memory Write data  (CAMINO DE STORE, clave)
-seg([(465, 344), (465, 440), (640, 440)]); tip((632, 440), (640, 440))
+# 7. Read data 2 ($t1) -> Data memory Write data  (CAMINO DE STORE, clave; pasa por ARRIBA de ALU control)
+seg([(465, 344), (465, 400), (640, 400)]); tip((632, 400), (640, 400))
 
 # 8. Sign-extend (offset=0) -> MUX ALUSrc input 1 (SELECCIONADA, ALUSrc=1)
 seg([(429, 446), (476, 446), (476, 380), (493, 380)]); tip((485, 380), (493, 380))
@@ -89,7 +91,7 @@ rt_text((198, 255), "$t0 01000", fsig)      # rs = $t0
 rt_text((198, 291), "$t1 01001", fsig)      # rt = $t1 (dato a guardar)
 rt_text((198, 465), "0000...0", frs)        # inmediato (offset)
 rt_text((595, 325), "$t0+0", frs)           # direccion calculada por la ALU
-rt_text((605, 428), "$t1", fr)              # dato escrito en memoria
+rt_text((605, 415), "$t1", fr)              # dato escrito en memoria
 rt_text((442, 198), "00", fsig)             # ALUOp
 
 # señales de control (a la derecha de sus etiquetas, misma fila que el texto azul)
