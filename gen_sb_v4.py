@@ -76,6 +76,9 @@ seg([(405, 210), (466, 210), (466, 516), (530, 516), (530, 486)]); tip((530, 494
 # 10b. Control: ALUSrc -> selector del MUX (ALUSrc=1, activo)
 seg([(405, 220), (503, 220), (503, 335)]); tip((503, 343), (503, 335))
 
+# 10c. ALU control -> ALU (le indica que sume, sale por el costado derecho del circulo)
+seg([(558, 453), (570, 453), (570, 365)]); tip((570, 373), (570, 365))
+
 # 11. ALU result -> Data memory Address
 seg([(612, 338), (640, 338)]); tip((633, 338), (640, 338))
 
