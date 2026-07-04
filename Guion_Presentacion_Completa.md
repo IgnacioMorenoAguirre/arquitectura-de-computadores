@@ -1,9 +1,11 @@
 # Guion de la presentación completa (11 slides, ~10 minutos)
 
-> Cubre todo el deck actual. Las partes que no son tuyas (slides compartidas,
-> `beq`, `lbu`) están en versión corta, solo para que sepas el hilo completo
-> y puedas seguir si alguien se traba. Tu parte fuerte (`sb`) tiene el detalle
-> completo en `Guion_QA_sb.md` — acá va la versión resumida para no repetir.
+> Cubre las slides compartidas y tu parte (`sb`). Las slides de tus
+> compañeros (`beq`, `lbu`) no llevan guion acá — es su instrucción, cada uno
+> arma su propia explicación. Solo se dejan marcadas con el tiempo estimado,
+> para que la línea de tiempo total te sirva de referencia. Tu parte fuerte
+> (`sb`) tiene el detalle completo en `Guion_QA_sb.md` — acá va la versión
+> resumida para no repetir.
 
 **Tiempo sugerido total: ~9 minutos**, dejando 1 minuto de colchón para
 transiciones o que el profe interrumpa con una pregunta.
@@ -90,26 +92,15 @@ trazado con la palabra "hola".)*
 
 ---
 
-## Slide 8 — Datapath `beq` (≈1 min 30 seg, para quien la presente)
+## Slide 8 — Datapath `beq` (≈1 min 30 seg — la presenta tu compañero)
 
-> "La instrucción es `beq $t1, $zero, fin`: compara si `$t1` es igual a cero,
-> y si es así, salta a la etiqueta `fin`. El opcode `000100` prende `Branch`
-> y pone `ALUOp` en `01` (resta), porque la ALU calcula `$t1 - $zero` y usa
-> la señal Zero para decidir si son iguales. No hay escritura en memoria ni
-> en registros — `beq` solo compara y decide si saltar. Por eso todo el
-> camino de arriba (el cálculo de la dirección de salto con Shift-left-2 y
-> el sumador de branch) está activo, junto con la compuerta AND que combina
-> Branch con Zero para decidir el próximo PC."
+*(No es tu parte — cada uno arma su propio guion para su instrucción.)*
 
 ---
 
-## Slide 9 — Datapath `lbu` (≈1 min 30 seg, para quien la presente)
+## Slide 9 — Datapath `lbu` (≈1 min 30 seg — la presenta tu compañero)
 
-> "La instrucción es `lbu $t1, 0($t0)`: carga el byte en la dirección `$t0`
-> y lo guarda en `$t1`. El opcode `100100` prende `MemRead` y `RegWrite`, y
-> `MemtoReg`, porque el dato que se escribe en el registro viene de memoria,
-> no de la ALU. Es exactamente el camino contrario al de `sb`: acá el dato
-> **sale** de memoria y **entra** a un registro."
+*(No es tu parte — cada uno arma su propio guion para su instrucción.)*
 
 ---
 
@@ -146,9 +137,7 @@ trazado con la palabra "hola".)*
 ## Notas de tiempo
 
 - Si van sumando los tiempos sugeridos da **~9 minutos**, dejando margen.
-- Las slides 8 y 9 (`beq`, `lbu`) están resumidas porque no son tu parte —
-  no hace falta que te las aprendas al detalle, solo para que entiendas el
-  hilo si alguien pregunta algo cruzado ("¿en qué se parece tu instrucción a
-  la de tu compañero?").
+- Las slides 8 y 9 (`beq`, `lbu`) no llevan guion porque son la instrucción
+  de tus compañeros — cada uno prepara la suya.
 - Si el profe corta a mitad de una slide con una pregunta, no pasa nada:
   respondan y retomen donde quedaron.

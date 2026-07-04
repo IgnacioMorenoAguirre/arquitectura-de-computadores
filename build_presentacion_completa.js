@@ -53,7 +53,7 @@ children.push(
     children:[ new TextRun({ text:"11 slides — ~10 minutos", bold:true, size:28, color:"2E5496" }) ] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing:{after:300},
     children:[ new TextRun({ text:"Laboratorio Assembler MIPS — Arquitectura de Computadores (INF60500) — Ignacio Moreno", italics:true, size:22, color:"666666" }) ] }),
-  box([ new TextRun({ text:"Cubre todo el deck actual. Las partes que no son tuyas (slides compartidas, beq, lbu) están en versión corta, solo para que sepas el hilo completo y puedas seguir si alguien se traba. Tu parte fuerte (sb) tiene el detalle completo en Guion_QA_sb.md — acá va la versión resumida para no repetir.", size:22 }) ], FILL_TIP)
+  box([ new TextRun({ text:"Cubre las slides compartidas y tu parte (sb). Las slides de tus compañeros (beq, lbu) no llevan guion acá — es su instrucción, cada uno arma su propia explicación. Solo se dejan marcadas con el tiempo estimado. Tu parte fuerte (sb) tiene el detalle completo en Guion_QA_sb.md — acá va la versión resumida para no repetir.", size:22 }) ], FILL_TIP)
 );
 
 children.push(...slide("Slide 1 — Portada", "≈10 seg", FILL_SLIDE,
@@ -78,11 +78,11 @@ children.push(...slide("Slide 7 — Código LLL (Ensamblador)", "≈45 seg", FIL
   "“Y este es el mismo algoritmo, pero en ensamblador MIPS. main llama a la función transformar, que recorre la cadena con un puntero ($t0). En cada vuelta del bucle: se carga el carácter con lbu, se verifica con dos slti si está en el rango de una minúscula, y si lo está, se le resta 32 con addi y se guarda de vuelta con sb. Después se avanza al siguiente byte y se repite, hasta encontrar el carácter nulo que marca el final del texto.”",
   "Si te preguntan algo más específico del código completo, tienes el detalle en Explicacion_Codigo_Completo.md — registro por registro, con un ejemplo trazado con la palabra “hola”."));
 
-children.push(...slide("Slide 8 — Datapath beq (para quien la presente)", "≈1 min 30 seg", FILL_SLIDE,
-  "“La instrucción es beq $t1, $zero, fin: compara si $t1 es igual a cero, y si es así, salta a la etiqueta fin. El opcode 000100 prende Branch y pone ALUOp en 01 (resta), porque la ALU calcula $t1 - $zero y usa la señal Zero para decidir si son iguales. No hay escritura en memoria ni en registros — beq solo compara y decide si saltar. Por eso todo el camino de arriba (el cálculo de la dirección de salto con Shift-left-2 y el sumador de branch) está activo, junto con la compuerta AND que combina Branch con Zero para decidir el próximo PC.”"));
+children.push(...slide("Slide 8 — Datapath beq (la presenta tu compañero)", "≈1 min 30 seg", FILL_SLIDE,
+  "(No es tu parte — cada uno arma su propio guion para su instrucción.)"));
 
-children.push(...slide("Slide 9 — Datapath lbu (para quien la presente)", "≈1 min 30 seg", FILL_SLIDE,
-  "“La instrucción es lbu $t1, 0($t0): carga el byte en la dirección $t0 y lo guarda en $t1. El opcode 100100 prende MemRead y RegWrite, y MemtoReg, porque el dato que se escribe en el registro viene de memoria, no de la ALU. Es exactamente el camino contrario al de sb: acá el dato sale de memoria y entra a un registro.”"));
+children.push(...slide("Slide 9 — Datapath lbu (la presenta tu compañero)", "≈1 min 30 seg", FILL_SLIDE,
+  "(No es tu parte — cada uno arma su propio guion para su instrucción.)"));
 
 children.push(...slide("Slide 10 — Datapath sb — TU PARTE", "≈1 min 45 seg", FILL_MINE,
   "“Mi instrucción es sb, que guarda un dato en la memoria: guarda lo que hay en el registro te uno, en la dirección que apunta el registro te cero. Con el opcode 101000, Control prende la escritura en memoria y el selector (para usar el inmediato, no otro registro), y apaga la escritura en un registro, porque un guardado nunca cambia un registro.\n\nEl camino: se leen te cero y te uno del banco de registros, el inmediato pasa por Sign-extend, la ALU suma te cero más cero para obtener la dirección, y en paralelo el valor de te uno entra directo a la memoria como el dato a guardar. Como la señal de escritura está prendida, la memoria guarda ese byte ahí. No hay write-back, porque un guardado no cambia registros.”",
@@ -94,7 +94,7 @@ children.push(...slide("Slide 11 — Conclusiones", "≈30 seg", FILL_SLIDE,
 children.push(new Paragraph({ spacing:{before:300}, children:[] }));
 children.push(h1("Notas de tiempo"));
 children.push(p("Si van sumando los tiempos sugeridos da ~9 minutos, dejando margen."));
-children.push(p("Las slides 8 y 9 (beq, lbu) están resumidas porque no son tu parte — no hace falta que te las aprendas al detalle, solo para que entiendas el hilo si alguien pregunta algo cruzado (“¿en qué se parece tu instrucción a la de tu compañero?”)."));
+children.push(p("Las slides 8 y 9 (beq, lbu) no llevan guion porque son la instrucción de tus compañeros — cada uno prepara la suya."));
 children.push(p("Si el profe corta a mitad de una slide con una pregunta, no pasa nada: respondan y retomen donde quedaron."));
 
 const doc = new Document({
