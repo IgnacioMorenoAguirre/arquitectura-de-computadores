@@ -2,13 +2,14 @@ const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   Footer, AlignmentType, LevelFormat, HeadingLevel,
-  BorderStyle, WidthType, ShadingType, PageNumber, PageBreak
+  BorderStyle, WidthType, ShadingType, PageNumber
 } = require("docx");
 
 const CW = 9360; // content width (US Letter, 1" margins)
 const FILL_HEAD = "D6E4F0";
 const FILL_ALT = "F3F3F3";
 const FILL_Q = "E8EEF7";
+const FILL_TIP = "FFF6DD";
 const BORDER = { style: BorderStyle.SINGLE, size: 1, color: "BBBBBB" };
 const borders = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
 const NONE = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
@@ -32,21 +33,22 @@ function num(runs){
   return new Paragraph({ numbering:{reference:"no", level:0}, spacing:{after:180, line:320},
     alignment: AlignmentType.LEFT, children });
 }
-// Pregunta = caja con fondo celeste (una tabla de 1 celda, para que el shading
-// cubra todo el ancho). Respuesta = parrafo normal debajo, con sangria.
-function pregunta(q, a){
-  const qBox = new Table({
+function box(runs, fill){
+  const children = Array.isArray(runs) ? runs : [new TextRun(runs)];
+  return new Table({
     width:{size:CW, type:WidthType.DXA},
     rows:[ new TableRow({ children:[ new TableCell({
       borders: noBorders, width:{size:CW, type:WidthType.DXA},
-      shading:{ type:ShadingType.CLEAR, fill:FILL_Q },
+      shading:{ type:ShadingType.CLEAR, fill },
       margins:{ top:110, bottom:110, left:180, right:180 },
-      children:[ new Paragraph({ children:[ new TextRun({ text:"P: "+q, bold:true, size:24, color:"1F3864" }) ] }) ]
+      children:[ new Paragraph({ spacing:{line:320}, children }) ]
     }) ] }) ]
   });
+}
+function pregunta(q, a){
   return [
     new Paragraph({ spacing:{before:260}, children:[] }),
-    qBox,
+    box([ new TextRun({ text:"P: "+q, bold:true, size:24, color:"1F3864" }) ], FILL_Q),
     new Paragraph({ indent:{left:220}, spacing:{before:100, after:80, line:320},
       children:[ new TextRun({ text:"R: ", bold:true, color:"3C7A3C" }), new TextRun(a) ] })
   ];
@@ -79,109 +81,134 @@ children.push(
   new Paragraph({ alignment: AlignmentType.CENTER, spacing:{after:400},
     children:[ new TextRun({ text:"Laboratorio Assembler MIPS — Arquitectura de Computadores (INF60500) — Ignacio Moreno", italics:true, size:22, color:"666666" }) ] }),
   p([ new TextRun({ italics:true, color:"555555", size:22,
-    text:"Preparado para la evaluación presencial. El profe puede preguntar cualquier cosa de acá abajo, así que conviene entenderlo, no solo memorizarlo." }) ], {after:200})
+    text:"Preparado para la evaluación presencial. Escrito con palabras simples para que te salga natural al hablar, no como si estuvieras leyendo un libro." }) ], {after:200})
 );
+
+// ---------- 0. PRONUNCIACIÓN ----------
+children.push(h1("0. Cómo se dicen las cosas raras"));
+children.push(p("No hay que sonar “técnico” — se puede hablar simple. Guía rápida:"));
+children.push(table(
+  ["Se escribe", "Se dice (en voz alta)"],
+  [
+    ["$t0", "“te cero” — el signo $ no se dice, es solo parte de cómo se escribe."],
+    ["$t1", "“te uno”."],
+    ["sb $t1, 0($t0)", "más fácil: “la instrucción que guarda te uno en la dirección de te cero”."],
+    ["ALU", "tal cual, “a-ele-u”, o simplemente “la ALU”."],
+    ["MUX", "puedes decir “el selector” en vez de MUX — significa lo mismo y es más fácil."],
+    ["opcode", "“código de operación”, si prefieres no decir “opcode”."],
+    ["ALUOp", "“ALU-op”, o “la señal que le dice a ALU control qué hacer”."],
+    ["ALUSrc", "o simplemente “la señal del selector”."],
+    ["Sign-extend", "“el bloque que estira el número a 32 bits” — no hace falta decir el nombre en inglés."],
+    ["write-back", "“escribir de vuelta en un registro”."],
+  ],
+  [2400, 6960]
+));
+children.push(new Paragraph({ spacing:{before:200}, children:[] }));
+children.push(box([ new TextRun({ bold:true, text:"Tip: " }),
+  new TextRun("si te trabas con un nombre técnico, dilo en español simple (“el selector”, “la memoria”, “el registro te uno”) — el profe entiende igual y te va a sonar más natural que leer.") ],
+  FILL_TIP));
 
 // ---------- 1. GUION PRINCIPAL ----------
 children.push(h1("1. Guion principal"));
 children.push(p([ new TextRun({italics:true, color:"666666", text:"Léelo en este orden, apoyándote en la slide 6."}) ]));
 
 children.push(p([
-  plain('Mi instrucción es '), bold('sb $t1, 0($t0)'),
-  plain(', un store byte: guarda el contenido de $t1 en la memoria, en la dirección $t0 + 0.')
+  plain('Mi instrucción es '), bold('sb'), plain(', que guarda un dato en la memoria. Guarda lo que hay en el registro '),
+  bold('te uno'), plain(', en la dirección que apunta el registro '), bold('te cero'),
+  plain(', sin sumarle nada (el offset es 0).')
 ]));
 
 children.push(p([
-  plain('Es de tipo '), bold('I'), plain(' (inmediato). Sus 32 bits se dividen así:')
+  plain('Es una instrucción tipo '), bold('I'), plain(', o sea, con un número (inmediato) adentro. Sus 32 bits se separan así:')
 ], {after:120}));
-children.push(bullet([bold('opcode = 101000 '), plain('(bits 31-26) → le dice a Control que es un store.')]));
-children.push(bullet([bold('rs = 01000 '), plain('(bits 25-21) → registro $t0, la dirección base.')]));
-children.push(bullet([bold('rt = 01001 '), plain('(bits 20-16) → registro $t1, el dato a guardar.')]));
-children.push(bullet([bold('inmediato = 0000000000000000 '), plain('(bits 15-0) → el offset, en este caso 0.')]));
+children.push(bullet([plain('Los primeros 6 bits son el '), bold('código de operación'), plain(': '), bold('101000'), plain('. Con esto, la unidad de Control ya sabe que es un guardado (store).')]));
+children.push(bullet([plain('Los siguientes 5 bits dicen qué registro es la base: '), bold('01000'), plain(', que es '), bold('te cero'), plain('.')]));
+children.push(bullet([plain('Los siguientes 5 bits dicen qué dato se guarda: '), bold('01001'), plain(', que es '), bold('te uno'), plain('.')]));
+children.push(bullet([plain('Los últimos 16 bits son el número que se suma (el offset): puro cero.')]));
 
 children.push(p([
-  plain('Con el opcode, Control activa '), bold('MemWrite = 1'), plain(' y '), bold('ALUSrc = 1'),
-  plain(', y deja '), bold('RegWrite = 0'), plain(' porque un store nunca modifica un registro.')
+  plain('Con solo leer el código de operación, Control prende dos señales: '),
+  bold('prende la escritura en memoria'), plain(', y '), bold('prende el selector'),
+  plain(' (para usar el número, no otro registro). Y apaga la señal de '),
+  bold('escribir en un registro'), plain(', porque un guardado nunca cambia un registro.')
 ]));
 
-children.push(p([bold('El camino activo:')], {after:120}));
-children.push(num("El PC entra a Instruction memory y se leen los 32 bits."));
-children.push(num([bold('rs ($t0)'), plain(' va a Read register 1, y '), bold('rt ($t1)'), plain(' va a Read register 2 — el banco de registros entrega Read data 1 = valor de $t0 y Read data 2 = valor de $t1.')]));
-children.push(num("El inmediato pasa por Sign-extend, que lo lleva a 32 bits con signo (sigue siendo 0)."));
-children.push(num([bold('ALUSrc = 1'), plain(' → el MUX elige la salida de Sign-extend (no Read data 2) como segundo operando de la ALU.')]));
-children.push(num([bold('ALUOp = 00'), plain(' → le dice a ALU control que mande el código de sumar; ALU control manda esa señal a la ALU.')]));
-children.push(num("La ALU suma $t0 + 0 y el resultado es la dirección de memoria."));
-children.push(num("Esa dirección entra a Address de Data memory. En paralelo, Read data 2 ($t1) entra directo a Write data — sin pasar por la ALU."));
-children.push(num([bold('MemWrite = 1'), plain(' → la memoria escribe el byte de $t1 en esa dirección.')]));
-children.push(num([bold('No hay write-back'), plain(': RegWrite = 0, así que no se toca ningún registro, y por eso Read data de memoria y el MUX final ni se usan.')]));
-children.push(num("En paralelo, PC+4 avanza al programa hacia la siguiente instrucción (Branch = 0, no hay salto)."));
+children.push(p([bold('Ahora el camino, paso a paso:')], {after:120}));
+children.push(num("El PC (el contador de programa) apunta a la memoria de instrucciones y ahí se leen los 32 bits."));
+children.push(num([plain('Del banco de registros se leen dos valores: el de '), bold('te cero'), plain(' (la dirección) y el de '), bold('te uno'), plain(' (el dato a guardar).')]));
+children.push(num("El offset (puro cero) pasa por el bloque que lo estira a 32 bits."));
+children.push(num("Como el selector está prendido, se elige ese número estirado, y no el otro registro, para sumarlo."));
+children.push(num([plain('La ALU suma '), bold('te cero más cero'), plain(', y ese resultado es la dirección donde se va a escribir.')]));
+children.push(num([plain('Esa dirección entra a la memoria. Al mismo tiempo, el valor de '), bold('te uno'), plain(' entra directo a la memoria también, pero como el dato a guardar — sin pasar por la ALU.')]));
+children.push(num("Como la señal de escritura está prendida, la memoria guarda ese byte ahí."));
+children.push(num("No se escribe nada de vuelta en ningún registro, porque esa señal está apagada. Un guardado no cambia registros."));
+children.push(num("Y en paralelo, como siempre, el programa avanza a la siguiente instrucción."));
 
 // ---------- 2. TABLA DE SEÑALES ----------
 children.push(h1("2. Señales de control, una por una"));
-children.push(p("Por si preguntan “¿por qué ese valor?”:"));
 children.push(table(
-  ["Señal", "Valor", "Por qué"],
+  ["Señal", "Valor", "Por qué (en palabras simples)"],
   [
-    ["RegDst", "X", "No hay escritura a registro, así que da igual qué registro “elegiría” el mux de destino — nunca se usa."],
-    ["Branch", "0", "sb no es un salto condicional."],
-    ["MemRead", "0", "No se lee memoria, se escribe."],
-    ["MemtoReg", "X", "Solo se usa para decidir qué se escribe en el registro — y como RegWrite=0, no aplica."],
-    ["ALUOp", "00", "Código fijo que le dice a ALU control “esta es una operación de suma” (para calcular direcciones, siempre se suma)."],
-    ["MemWrite", "1", "Es la señal que define que esto es un store: se activa la escritura en memoria."],
-    ["ALUSrc", "1", "El segundo operando de la ALU viene del inmediato (Sign-extend), no de un registro."],
-    ["RegWrite", "0", "Un store no modifica ningún registro."],
+    ["RegDst", "no importa", "No se va a escribir en ningún registro, así que da lo mismo."],
+    ["Branch", "apagada (0)", "Esto no es un salto."],
+    ["MemRead", "apagada (0)", "No se lee la memoria, se escribe."],
+    ["MemtoReg", "no importa", "Solo sirve si se va a escribir en un registro — y acá no se escribe."],
+    ["ALUOp", "suma (00)", "Le dice a ALU control “quiero que sumes”, fijo, sin mirar nada más."],
+    ["MemWrite", "prendida (1)", "Esta es la señal clave: dice “esto es un guardado”."],
+    ["ALUSrc (selector)", "prendido (1)", "La ALU va a sumar con el número (offset), no con otro registro."],
+    ["RegWrite", "apagada (0)", "Un guardado no cambia ningún registro."],
   ],
-  [1600, 1000, 6760]
+  [1900, 1300, 6160]
 ));
 
 // ---------- 3. PREGUNTAS TÍPICAS ----------
 children.push(h1("3. Preguntas típicas del profe"));
-children.push(p([ new TextRun({italics:true, color:"666666", text:"Con respuesta corta, lista para decir en voz alta."}) ], {after:60}));
+children.push(p([ new TextRun({italics:true, color:"666666", text:"Con respuesta corta y simple, lista para decir en voz alta."}) ], {after:60}));
 
 children.push(...pregunta(
-  "¿Por qué RegWrite es 0?",
-  "Porque sb guarda un dato en memoria, no lo trae de vuelta a un registro. No hay write-back."
+  "¿Por qué no se escribe en ningún registro?",
+  "Porque esta instrucción guarda un dato en memoria — no trae nada de vuelta a un registro."
 ));
 children.push(...pregunta(
-  "¿Por qué ALUSrc es 1 y no 0?",
-  "Porque la ALU necesita sumar $t0 con el offset inmediato (0 en este caso), no con otro registro. Si fuera una instrucción tipo add $t1,$t2,$t3, ahí sí ALUSrc sería 0 (el segundo operando vendría de Read data 2)."
+  "¿Por qué el selector está prendido?",
+  "Porque la ALU tiene que sumar el registro te cero con el número que viene en la instrucción (el offset), no con otro registro."
 ));
 children.push(...pregunta(
-  "¿Qué hace la ALU exactamente?",
-  "Suma $t0 (dirección base) + el inmediato con signo (0) = dirección de memoria donde se escribe."
+  "¿Qué calcula la ALU acá?",
+  "Solo la dirección: te cero más el offset (que es cero). Ese resultado es dónde se va a guardar el dato."
 ));
 children.push(...pregunta(
-  "¿Qué pasa con Read data 2 si no pasa por la ALU?",
-  "Va directo a Write data de Data memory. Es el dato a guardar, no participa en el cálculo de la dirección."
+  "¿Y el valor de te uno, por dónde pasa?",
+  "No pasa por la ALU. Va directo a la memoria como el dato que se va a guardar."
 ));
 children.push(...pregunta(
-  "¿Por qué Instruction[5-0] va a ALU control si esta instrucción no es tipo R?",
-  "Es una conexión física fija del datapath: esos 6 bits siempre se mandan a ALU control, pero acá no se usan de verdad, porque ALUOp=00 ya le dice a ALU control “suma” sin mirar esos bits. Esos bits importan cuando ALUOp=10 (instrucciones tipo R), ahí sí ALU control mira el funct para decidir entre suma, resta, AND, OR, etc."
+  "¿Por qué se manda algo a ALU control si esta instrucción no lo necesita?",
+  "Porque el cableado es siempre el mismo, para todas las instrucciones. Esos bits se mandan siempre, pero acá no importan, porque la otra señal (la del “quiero sumar”) ya le dice a ALU control qué hacer sin mirar esos bits. Esos bits sí importan en otro tipo de instrucciones (las que hacen operaciones entre dos registros)."
 ));
 children.push(...pregunta(
-  "¿Qué le dice ALU control a la ALU?",
-  "Le manda un código de 4 bits que en este caso significa “suma”. Esa señal entra a la ALU por abajo, junto al segundo operando."
+  "¿Qué le manda ALU control a la ALU?",
+  "Un código que en este caso significa “suma”. Esa señal entra a la ALU junto con los dos números que va a sumar."
 ));
 children.push(...pregunta(
-  "¿Por qué no sale nada de Data memory?",
-  "Porque MemRead=0. La memoria solo escribe, no entrega ningún dato de vuelta, y por eso el MUX final (el que elige entre resultado de ALU o dato leído de memoria) tampoco se usa."
+  "¿Por qué no sale nada de la memoria?",
+  "Porque no se está leyendo, se está escribiendo. Leer memoria es lo que hace la instrucción contraria a esta (la que carga un dato desde memoria a un registro)."
 ));
 children.push(...pregunta(
-  "¿Qué diferencia hay con lbu (la de tu compañero)?",
-  "lbu es la operación espejo: ahí MemRead=1, RegWrite=1, MemtoReg=1 (todo lo que en sb está apagado), y sí sale un dato de Read data de memoria que vuelve a escribirse en un registro. sb es exactamente lo opuesto: los datos van hacia la memoria, no vuelven."
+  "¿En qué se diferencia de la instrucción de tu compañero (la que carga datos)?",
+  "Es exactamente al revés: la de él trae un dato de la memoria y lo guarda en un registro. La mía toma un dato de un registro y lo guarda en la memoria. Por eso casi todas las señales están invertidas entre las dos."
 ));
 children.push(...pregunta(
-  "¿Por qué el PC+4 sigue activo si esto no es un salto?",
-  "Porque avanzar al programa (PC = PC+4) pasa en toda instrucción, sea cual sea. Es independiente de si hay salto o no — el salto solo cambiaría qué valor entra al MUX final de arriba (PCSrc), pero acá Branch=0 así que siempre se elige PC+4."
+  "¿Por qué el programa sigue avanzando si esto no es un salto?",
+  "Porque avanzar al programa pasa siempre, en toda instrucción. Un salto es la excepción, no la regla — y acá no hay salto."
 ));
 
-// ---------- 4. FRASES CLAVE ----------
-children.push(h1("4. Frases clave para no trabarte"));
-children.push(bullet('"Es un store, así que los datos van hacia la memoria, no vuelven."'));
-children.push(bullet('"ALUSrc=1 porque sumo con el inmediato, no con otro registro."'));
-children.push(bullet('"MemWrite=1 es la señal que define que esto es un store."'));
-children.push(bullet('"No hay write-back porque RegWrite=0 — no se modifica ningún registro."'));
-children.push(bullet('"El opcode 101000 es lo único que Control necesita para prender MemWrite y ALUSrc, y apagar RegWrite."'));
+// ---------- 4. FRASES CORTAS ----------
+children.push(h1("4. Frases cortas para no quedarte en blanco"));
+children.push(bullet('"Esto guarda un dato en memoria, no lo trae de vuelta."'));
+children.push(bullet('"El selector está prendido porque sumo con el número, no con otro registro."'));
+children.push(bullet('"La señal de escritura en memoria es la que define que esto es un guardado."'));
+children.push(bullet('"No se escribe en ningún registro — por eso esa señal está apagada."'));
+children.push(bullet('"Con el código de operación alcanza para prender la escritura en memoria y el selector, y apagar la escritura en registro."'));
 
 const doc = new Document({
   styles: {

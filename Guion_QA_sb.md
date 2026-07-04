@@ -1,96 +1,120 @@
 # Guion de exposición y Q&A — instrucción `sb $t1, 0($t0)`
 
-> Preparado para la evaluación presencial. El profe puede preguntar cualquier cosa
-> de acá abajo, así que conviene entenderlo, no solo memorizarlo.
+> Preparado para la evaluación presencial. Escrito con palabras simples para que
+> te salga natural al hablar, no como si estuvieras leyendo un libro.
+
+---
+
+## 0. Cómo se dicen las cosas raras (no te trabes con esto)
+
+No hay que sonar "técnico" — se puede hablar simple. Guía rápida:
+
+| Se escribe | Se dice (en voz alta) |
+|---|---|
+| `$t0` | **"te cero"** (el signo `$` no se dice, es solo parte de cómo se escribe) |
+| `$t1` | **"te uno"** |
+| `sb $t1, 0($t0)` | **"ese-be, te uno, coma, cero de te cero"** — o más fácil: **"la instrucción que guarda te uno en la dirección de te cero"** |
+| ALU | se dice tal cual, **"a-ele-u"**, o simplemente "la ALU" |
+| MUX | puedes decir **"el selector"** en vez de MUX — significa lo mismo y es más fácil |
+| opcode | **"código de operación"** (así, en español, si prefieres no decir "opcode") |
+| ALUOp | **"ALU-op"**, o simplemente "la señal que le dice a ALU control qué hacer" |
+| ALUSrc | **"ALU-Sers"**, o simplemente "la señal del selector" |
+| Sign-extend | **"el bloque que estira el número a 32 bits"** — no hace falta decir "Sign-extend" si no te sale cómodo |
+| write-back | **"escribir de vuelta en un registro"** — evita el término en inglés si no te acomoda |
+
+**Tip:** si te trabas con un nombre técnico, dilo en español simple ("el selector", "la memoria", "el registro te uno") — el profe entiende igual y te va a sonar más natural que leer.
 
 ---
 
 ## 1. Guion principal (lo que dices en voz alta)
 
-Léelo en este orden, apoyándote en la slide 6:
-
-> "Mi instrucción es **`sb $t1, 0($t0)`**, un store byte: guarda el contenido de `$t1`
-> en la memoria, en la dirección `$t0 + 0`.
+> "Mi instrucción es `sb`, que guarda un dato en la memoria. Guarda lo que hay en
+> el registro **te uno**, en la dirección que apunta el registro **te cero**, sin
+> sumarle nada (el offset es 0).
 >
-> Es de tipo **I** (inmediato). Sus 32 bits se dividen así:
-> - **opcode = 101000** (bits 31-26): le dice a la unidad de Control que es un store.
-> - **rs = 01000** (bits 25-21): registro `$t0`, la dirección base.
-> - **rt = 01001** (bits 20-16): registro `$t1`, el dato que se va a guardar.
-> - **inmediato = 0000000000000000** (bits 15-0): el offset, que en este caso es 0.
+> Es una instrucción tipo **I**, o sea, con un número (inmediato) adentro. Sus 32
+> bits se separan así:
+> - Los primeros 6 bits son el **código de operación**: `101000`. Con esto, la
+>   unidad de Control ya sabe que es un guardado (store).
+> - Los siguientes 5 bits dicen qué registro es la base: `01000`, que es **te cero**.
+> - Los siguientes 5 bits dicen qué dato se guarda: `01001`, que es **te uno**.
+> - Los últimos 16 bits son el número que se suma (el offset): puro cero.
 >
-> Con el opcode, Control activa **MemWrite = 1** y **ALUSrc = 1**, y deja
-> **RegWrite = 0** porque un store nunca modifica un registro.
+> Con solo leer el código de operación, Control prende dos señales: **prende la
+> escritura en memoria**, y **prende el selector** (para usar el número, no otro
+> registro). Y apaga la señal de **escribir en un registro**, porque un guardado
+> nunca cambia un registro.
 >
-> El camino activo es:
-> 1. El PC entra a Instruction memory y se leen los 32 bits.
-> 2. rs (`$t0`) va a Read register 1, y rt (`$t1`) va a Read register 2 — el banco
->    de registros entrega `Read data 1` = valor de `$t0` y `Read data 2` = valor de `$t1`.
-> 3. El inmediato pasa por Sign-extend, que lo lleva a 32 bits con signo (sigue siendo 0).
-> 4. Como ALUSrc = 1, el MUX elige la salida de Sign-extend (no `Read data 2`) como
->    segundo operando de la ALU.
-> 5. ALUOp = 00 le dice a ALU control que mande el código de **sumar**; ALU control
->    manda esa señal a la ALU.
-> 6. La ALU suma `$t0 + 0` y el resultado es la **dirección de memoria**.
-> 7. Esa dirección entra a `Address` de Data memory. En paralelo, `Read data 2`
->    ($t1) entra directo a `Write data` — sin pasar por la ALU.
-> 8. Como MemWrite = 1, la memoria escribe el byte de `$t1` en esa dirección.
-> 9. No hay write-back: RegWrite = 0, así que no se toca ningún registro, y por
->    eso `Read data` de memoria y el MUX final ni se usan.
-> 10. En paralelo, PC+4 avanza al programa hacia la siguiente instrucción
->     (Branch = 0, no hay salto)."
+> Ahora el camino, paso a paso:
+> 1. El PC (el contador de programa) apunta a la memoria de instrucciones y ahí
+>    se leen los 32 bits.
+> 2. Del banco de registros se leen dos valores: el de **te cero** (la dirección)
+>    y el de **te uno** (el dato a guardar).
+> 3. El offset (puro cero) pasa por el bloque que lo estira a 32 bits.
+> 4. Como el selector está prendido, se elige ese número estirado, y no el otro
+>    registro, para sumarlo.
+> 5. La ALU suma **te cero más cero**, y ese resultado es la dirección donde se
+>    va a escribir.
+> 6. Esa dirección entra a la memoria. Al mismo tiempo, el valor de **te uno**
+>    entra directo a la memoria también, pero como el dato a guardar — sin pasar
+>    por la ALU.
+> 7. Como la señal de escritura está prendida, la memoria guarda ese byte ahí.
+> 8. No se escribe nada de vuelta en ningún registro, porque esa señal está
+>    apagada. Un guardado no cambia registros.
+> 9. Y en paralelo, como siempre, el programa avanza a la siguiente instrucción."
 
 ---
 
-## 2. Señales de control, una por una (por si preguntan "¿por qué ese valor?")
+## 2. Señales de control, una por una
 
-| Señal | Valor | Por qué |
+| Señal | Valor | Por qué (en palabras simples) |
 |---|---|---|
-| RegDst | X (no importa) | No hay escritura a registro, así que da igual qué registro "elegiría" el mux de destino — nunca se usa. |
-| Branch | 0 | `sb` no es un salto condicional. |
-| MemRead | 0 | No se lee memoria, se escribe. |
-| MemtoReg | X (no importa) | Solo se usa para decidir qué se escribe en el registro — y como RegWrite=0, no aplica. |
-| ALUOp | 00 | Código fijo que le dice a ALU control "esta es una operación de suma" (para calcular direcciones, siempre se suma). |
-| MemWrite | 1 | Es la señal que define que esto es un store: se **activa** la escritura en memoria. |
-| ALUSrc | 1 | El segundo operando de la ALU viene del inmediato (Sign-extend), no de un registro. |
-| RegWrite | 0 | Un store no modifica ningún registro. |
+| RegDst | no importa | No se va a escribir en ningún registro, así que da lo mismo. |
+| Branch | apagada (0) | Esto no es un salto. |
+| MemRead | apagada (0) | No se lee la memoria, se escribe. |
+| MemtoReg | no importa | Solo sirve si se va a escribir en un registro — y acá no se escribe. |
+| ALUOp | suma (00) | Le dice a ALU control "quiero que sumes", fijo, sin mirar nada más. |
+| MemWrite | prendida (1) | Esta es la señal clave: dice "esto es un guardado". |
+| ALUSrc (selector) | prendido (1) | La ALU va a sumar con el número (offset), no con otro registro. |
+| RegWrite | apagada (0) | Un guardado no cambia ningún registro. |
 
 ---
 
-## 3. Preguntas típicas que puede hacer el profe (y respuesta corta)
+## 3. Preguntas típicas del profe (con respuesta corta y simple)
 
-**¿Por qué RegWrite es 0?**
-Porque `sb` guarda un dato en memoria, no lo trae de vuelta a un registro. No hay write-back.
+**¿Por qué no se escribe en ningún registro?**
+Porque esta instrucción guarda un dato en memoria — no trae nada de vuelta a un registro.
 
-**¿Por qué ALUSrc es 1 y no 0?**
-Porque la ALU necesita sumar `$t0` con el **offset inmediato** (0 en este caso), no con otro registro. Si fuera una instrucción tipo `add $t1,$t2,$t3`, ahí sí ALUSrc sería 0 (el segundo operando vendría de Read data 2).
+**¿Por qué el selector está prendido?**
+Porque la ALU tiene que sumar el registro **te cero** con el número que viene en la instrucción (el offset), no con otro registro.
 
-**¿Qué hace la ALU exactamente?**
-Suma `$t0` (dirección base) + el inmediato con signo (0) = dirección de memoria donde se escribe.
+**¿Qué calcula la ALU acá?**
+Solo la dirección: **te cero más el offset** (que es cero). Ese resultado es dónde se va a guardar el dato.
 
-**¿Qué pasa con `Read data 2` si no pasa por la ALU?**
-Va directo a `Write data` de Data memory. Es el dato a guardar, no participa en el cálculo de la dirección.
+**¿Y el valor de te uno, por dónde pasa?**
+No pasa por la ALU. Va directo a la memoria como el dato que se va a guardar.
 
-**¿Por qué `Instruction[5-0]` va a ALU control si esta instrucción no es tipo R?**
-Es una conexión física fija del datapath: esos 6 bits siempre se mandan a ALU control, pero acá **no se usan de verdad**, porque `ALUOp=00` ya le dice a ALU control "suma" sin mirar esos bits. Esos bits importan cuando ALUOp=10 (instrucciones tipo R), ahí sí ALU control mira el funct para decidir entre suma, resta, AND, OR, etc.
+**¿Por qué se manda algo a ALU control si esta instrucción no lo necesita?**
+Porque el cableado es siempre el mismo, para todas las instrucciones. Esos bits se mandan siempre, pero acá no importan, porque la otra señal (la del "quiero sumar") ya le dice a ALU control qué hacer sin mirar esos bits. Esos bits sí importan en otro tipo de instrucciones (las que hacen operaciones entre dos registros).
 
-**¿Qué le dice ALU control a la ALU?**
-Le manda un código de 4 bits que en este caso significa "suma". Esa señal entra a la ALU por abajo, junto al segundo operando.
+**¿Qué le manda ALU control a la ALU?**
+Un código que en este caso significa "suma". Esa señal entra a la ALU junto con los dos números que va a sumar.
 
-**¿Por qué no sale nada de Data memory?**
-Porque `MemRead=0`. La memoria solo escribe, no entrega ningún dato de vuelta, y por eso el MUX final (el que elige entre resultado de ALU o dato leído de memoria) tampoco se usa.
+**¿Por qué no sale nada de la memoria?**
+Porque no se está leyendo, se está escribiendo. Leer memoria es lo que hace la instrucción contraria a esta (la que carga un dato desde memoria a un registro).
 
-**¿Qué diferencia hay con `lbu` (la de tu compañero)?**
-`lbu` es la operación espejo: ahí `MemRead=1`, `RegWrite=1`, `MemtoReg=1` (todo lo que en `sb` está apagado), y sí sale un dato de `Read data` de memoria que vuelve a escribirse en un registro. `sb` es exactamente lo opuesto: los datos van **hacia** la memoria, no vuelven.
+**¿En qué se diferencia de la instrucción de tu compañero (la que carga datos)?**
+Es exactamente al revés: la de él trae un dato de la memoria y lo guarda en un registro. La mía toma un dato de un registro y lo guarda en la memoria. Por eso casi todas las señales están invertidas entre las dos.
 
-**¿Por qué el PC+4 sigue activo si esto no es un salto?**
-Porque avanzar al programa (PC = PC+4) pasa en **toda** instrucción, sea cual sea. Es independiente de si hay salto o no — el salto solo cambiaría qué valor entra al MUX final de arriba (PCSrc), pero acá Branch=0 así que siempre se elige PC+4.
+**¿Por qué el programa sigue avanzando si esto no es un salto?**
+Porque avanzar al programa pasa siempre, en toda instrucción. Un salto es la excepción, no la regla — y acá no hay salto.
 
 ---
 
-## 4. Frases clave para no trabarte
+## 4. Frases cortas para no quedarte en blanco
 
-- "Es un **store**, así que los datos van hacia la memoria, no vuelven."
-- "`ALUSrc=1` porque sumo con el inmediato, no con otro registro."
-- "`MemWrite=1` es la señal que define que esto es un store."
-- "No hay write-back porque `RegWrite=0` — no se modifica ningún registro."
-- "El opcode `101000` es lo único que Control necesita para prender `MemWrite` y `ALUSrc`, y apagar `RegWrite`."
+- "Esto guarda un dato en memoria, no lo trae de vuelta."
+- "El selector está prendido porque sumo con el número, no con otro registro."
+- "La señal de escritura en memoria es la que define que esto es un guardado."
+- "No se escribe en ningún registro — por eso esa señal está apagada."
+- "Con el código de operación alcanza para prender la escritura en memoria y el selector, y apagar la escritura en registro."
