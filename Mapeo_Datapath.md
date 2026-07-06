@@ -21,6 +21,8 @@ qué **señales de control** se activan.
 main:
     la   $a0, mensaje        # pseudo -> lui + ori   (cargar dirección)
     jal  transformar         # J-type  (salto y enlace, guarda retorno en $ra)
+    li   $v0, 4              # pseudo -> addiu       (código de imprimir cadena)
+    syscall                  # llamada al sistema (imprime la cadena ya transformada)
     li   $v0, 10             # pseudo -> addiu       (código de salida)
     syscall                  # llamada al sistema (terminar)
 
@@ -85,7 +87,7 @@ PCSrc, Jump).
 
 | Grupo (instrucciones) | RegDst | ALUSrc | MemtoReg | RegWrite | MemRead | MemWrite | Branch | Jump | ALUOp |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| **R-type** (`move`/`addu`, `jr`) | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | funct |
+| **R-type** (`move`/`addu`, `jr`) | 1 | 0 | 0 | move:1 / jr:0 | 0 | 0 | 0 | 0 | funct |
 | **ALU-inmediato** (`addi`, `slti`, `li`) | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | add / slt |
 | **Load** (`lbu`) | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | add |
 | **Store** (`sb`) | X | 1 | X | 0 | 0 | 1 | 0 | 0 | add |
@@ -95,7 +97,8 @@ PCSrc, Jump).
 Notas clave para el profe:
 - **`bne` = `beq` con la condición invertida**: salta cuando la ALU da Zero = 0.
 - **`jal`** además escribe `PC+4` en `$ra` (por eso RegWrite=1).
-- **`jr`** es R-type: pone `PC = $ra` (no escribe en registros).
+- **`jr`** no escribe ningún registro (RegWrite=0); solo copia `$ra` al PC — por
+  eso el grupo R-type se anota `move:1 / jr:0`, igual que se hizo con `j`/`jal`.
 - **`lbu`/`sb`** recorren la misma ruta que `lw`/`sw`; la diferencia (1 byte vs 4) la maneja la memoria de datos.
 
 ---
@@ -164,12 +167,8 @@ MARS las traduce a instrucciones reales; el profe puede preguntar esto:
 
 ---
 
-## Mejora sugerida para la demo
-El código actual transforma en memoria y termina, pero **no imprime** el resultado.
-Para que se vea la salida en MARS, antes de `li $v0,10` conviene imprimir la cadena:
-
-```mips
-    la  $a0, mensaje      # dirección de la cadena ya transformada
-    li  $v0, 4            # syscall 4 = print string
-    syscall
-```
+## Nota sobre la salida del programa
+El programa **sí imprime** el resultado: después de `jal transformar`, `main` hace
+`li $v0,4` + `syscall` para imprimir la cadena ya transformada, y recién después
+termina con `li $v0,10` + `syscall`. Al ejecutar en MARS con `"holaComoEstas"`,
+la consola muestra directamente `HOLACOMOESTAS`.
