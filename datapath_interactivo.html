@@ -1,0 +1,612 @@
+<title>Datapath MIPS interactivo — Laboratorio conversor de mayúsculas</title>
+<style>
+  :root{
+    --bg:#0c1310; --bg2:#0f1815; --panel:#13201b; --panel2:#182a22;
+    --ink:#e8f0ec; --muted:#8fa69c; --line:#26362f;
+    --dim:#43554c; --data:#3ee08a; --data-glow:rgba(62,224,138,.45);
+    --ctrl:#f0a63c; --ctrl-dim:#6a5836;
+    --hi:#57d1ff; --hi-soft:rgba(87,209,255,.14);
+    --on-bg:rgba(62,224,138,.12); --off:#54655d;
+    --r:12px;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#eef1ec; --bg2:#e6ebe5; --panel:#f8faf6; --panel2:#ffffff;
+      --ink:#14211b; --muted:#54655d; --line:#d3ddd4;
+      --dim:#aebcb2; --data:#0f8a4e; --data-glow:rgba(15,138,78,.25);
+      --ctrl:#b3720a; --ctrl-dim:#c9b48c;
+      --hi:#0a6fb0; --hi-soft:rgba(10,111,176,.1);
+      --on-bg:rgba(15,138,78,.1); --off:#9fb0a6;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1310; --bg2:#0f1815; --panel:#13201b; --panel2:#182a22;
+    --ink:#e8f0ec; --muted:#8fa69c; --line:#26362f;
+    --dim:#43554c; --data:#3ee08a; --data-glow:rgba(62,224,138,.45);
+    --ctrl:#f0a63c; --ctrl-dim:#6a5836; --hi:#57d1ff; --hi-soft:rgba(87,209,255,.14);
+    --on-bg:rgba(62,224,138,.12); --off:#54655d;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1ec; --bg2:#e6ebe5; --panel:#f8faf6; --panel2:#ffffff;
+    --ink:#14211b; --muted:#54655d; --line:#d3ddd4;
+    --dim:#aebcb2; --data:#0f8a4e; --data-glow:rgba(15,138,78,.25);
+    --ctrl:#b3720a; --ctrl-dim:#c9b48c; --hi:#0a6fb0; --hi-soft:rgba(10,111,176,.1);
+    --on-bg:rgba(15,138,78,.1); --off:#9fb0a6;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(1200px 600px at 15% -10%, var(--bg2), transparent 60%),
+      var(--bg);
+    color:var(--ink);font-family:var(--sans);line-height:1.5;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 20px 60px;}
+
+  /* ---------- header ---------- */
+  header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px;
+    border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:22px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--data);margin:0 0 8px;}
+  h1{font-family:var(--mono);font-weight:600;font-size:clamp(24px,4vw,34px);
+    letter-spacing:-.01em;margin:0;text-wrap:balance;}
+  .sub{color:var(--muted);margin:8px 0 0;max-width:60ch;font-size:15px;}
+  .prog{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+    padding:10px 14px;white-space:nowrap;}
+  .prog b{color:var(--ink);font-weight:600;}
+  .themebtn{margin-left:auto;font-family:var(--mono);font-size:12px;cursor:pointer;
+    background:var(--panel);color:var(--muted);border:1px solid var(--line);
+    border-radius:99px;padding:7px 14px;letter-spacing:.04em;}
+  .themebtn:hover{color:var(--ink);border-color:var(--dim);}
+
+  /* ---------- instruction selector ---------- */
+  .selector{margin-bottom:20px;}
+  .selrow{display:flex;flex-wrap:wrap;gap:14px 22px;}
+  .grp{display:flex;flex-direction:column;gap:7px;}
+  .grp h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 1px;font-weight:600;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:var(--mono);font-size:12.5px;cursor:pointer;
+    background:var(--panel);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;padding:6px 10px;transition:.15s;position:relative;white-space:nowrap;}
+  .chip:hover{border-color:var(--dim);transform:translateY(-1px);}
+  .chip[aria-pressed="true"]{background:var(--on-bg);border-color:var(--data);
+    color:var(--ink);box-shadow:0 0 0 1px var(--data) inset;}
+  .chip.mine::after{content:"TÚ";position:absolute;top:-8px;right:-7px;
+    font-size:8.5px;letter-spacing:.08em;background:var(--hi);color:#022;
+    padding:1px 4px;border-radius:5px;font-weight:700;}
+  :root[data-theme="light"] .chip.mine::after,
+  @media (prefers-color-scheme:light){.chip.mine::after{color:#fff;}}
+
+  /* ---------- main layout ---------- */
+  .console{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:920px){.console{grid-template-columns:1fr;}}
+
+  .board{background:linear-gradient(180deg,var(--panel),var(--bg2));
+    border:1px solid var(--line);border-radius:var(--r);padding:14px 14px 8px;
+    position:sticky;top:14px;}
+  @media(max-width:920px){.board{position:static;}}
+  .boardhead{display:flex;justify-content:space-between;align-items:baseline;
+    gap:10px;margin:2px 4px 8px;}
+  .boardhead .cur{font-family:var(--mono);font-size:14px;color:var(--data);font-weight:600;}
+  .boardhead .cur small{color:var(--muted);font-weight:400;}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);
+    font-size:10.5px;color:var(--muted);margin:4px 4px 2px;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .swatch{width:16px;height:3px;border-radius:2px;display:inline-block;}
+  .sw-data{background:var(--data);} .sw-ctrl{background:var(--ctrl);}
+  .sw-dim{background:var(--dim);} .sw-hi{background:var(--hi);}
+  .svgbox{overflow-x:auto;}
+  svg.dp{width:100%;height:auto;min-width:620px;display:block;}
+
+  /* svg element states */
+  .wire{fill:none;stroke:var(--dim);stroke-width:1.5;opacity:.34;
+    marker-end:url(#ah-dim);transition:stroke .25s,opacity .25s,stroke-width .25s;}
+  .wire.on{stroke:var(--data);stroke-width:2.4;opacity:1;
+    marker-end:url(#ah-data);filter:drop-shadow(0 0 3px var(--data-glow));}
+  .cwire{fill:none;stroke:var(--ctrl-dim);stroke-width:1.4;opacity:.4;
+    stroke-dasharray:4 3;marker-end:url(#ah-dim);transition:.25s;}
+  .cwire.on{stroke:var(--ctrl);opacity:1;marker-end:url(#ah-ctrl);}
+  .wire.dash{stroke-dasharray:5 4;}
+  .cbox{fill:var(--panel2);stroke:var(--dim);stroke-width:1.4;opacity:.5;
+    transition:.25s;}
+  .comp.on .cbox{stroke:var(--data);opacity:1;
+    filter:drop-shadow(0 0 4px var(--data-glow));}
+  .clbl{fill:var(--muted);font-family:var(--mono);font-size:10px;
+    text-anchor:middle;transition:.25s;opacity:.6;}
+  .comp.on .clbl{fill:var(--ink);opacity:1;}
+  .clbl.sm{font-size:8px;}
+  .plabel{fill:var(--muted);font-family:var(--mono);font-size:8px;opacity:.55;}
+
+  /* ---------- side panel ---------- */
+  .panel{display:flex;flex-direction:column;gap:16px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+    padding:15px 16px;}
+  .card h2{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:600;
+    display:flex;align-items:center;gap:8px;}
+  .card h2 .tag{margin-left:auto;font-size:10px;letter-spacing:.08em;
+    padding:2px 8px;border-radius:99px;background:var(--panel2);color:var(--ink);
+    border:1px solid var(--line);}
+
+  /* 32-bit field strip */
+  .bits{display:flex;gap:3px;overflow-x:auto;padding-bottom:2px;}
+  .field{flex-grow:1;min-width:0;background:var(--panel2);border:1px solid var(--line);
+    border-radius:7px;padding:7px 6px;text-align:center;}
+  .field .rng{font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:.02em;}
+  .field .bin{font-family:var(--mono);font-size:11px;color:var(--data);margin:3px 0;
+    word-break:break-all;font-variant-numeric:tabular-nums;}
+  .field .mn{font-size:10px;color:var(--ink);}
+  .field.f-op{border-color:var(--data);}
+
+  /* signals grid */
+  .sigs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+  .sig{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+    padding:8px 9px;position:relative;}
+  .sig .nm{font-family:var(--mono);font-size:10.5px;color:var(--muted);
+    display:flex;justify-content:space-between;align-items:center;gap:6px;}
+  .sig .val{font-family:var(--mono);font-weight:700;font-size:12px;
+    width:22px;height:20px;display:grid;place-items:center;border-radius:5px;flex:none;}
+  .v1{background:var(--on-bg);color:var(--data);box-shadow:0 0 0 1px var(--data) inset;}
+  .v0{background:transparent;color:var(--off);box-shadow:0 0 0 1px var(--line) inset;}
+  .vx{background:rgba(240,166,60,.13);color:var(--ctrl);box-shadow:0 0 0 1px var(--ctrl) inset;}
+  .vi{background:rgba(240,166,60,.08);color:var(--ctrl);box-shadow:0 0 0 1px var(--ctrl-dim) inset;font-size:10px;}
+  .sig .why{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.35;}
+
+  /* steps */
+  ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;
+    display:flex;flex-direction:column;gap:9px;}
+  ol.steps li{counter-increment:s;position:relative;padding-left:30px;font-size:13.5px;
+    color:var(--ink);}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:-1px;
+    width:21px;height:21px;border-radius:6px;display:grid;place-items:center;
+    font-family:var(--mono);font-size:11px;font-weight:600;
+    background:var(--on-bg);color:var(--data);border:1px solid var(--line);}
+  ol.steps b{color:var(--data);font-weight:600;}
+  code{font-family:var(--mono);font-size:.92em;background:var(--panel2);
+    padding:1px 5px;border-radius:4px;border:1px solid var(--line);}
+
+  /* guion */
+  .guion{background:var(--hi-soft);border:1px solid var(--line);
+    border-left:3px solid var(--hi);border-radius:8px;padding:12px 14px;
+    font-size:13.5px;color:var(--ink);font-style:italic;line-height:1.55;}
+  .guion::before{content:"“ ";color:var(--hi);}
+  .guion::after{content:" ”";color:var(--hi);}
+
+  /* ---------- bottom reference ---------- */
+  .ref{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:720px){.ref{grid-template-columns:1fr;}}
+  .stages{display:flex;flex-direction:column;gap:8px;}
+  .stage{display:flex;gap:12px;align-items:baseline;font-size:13px;}
+  .stage .n{font-family:var(--mono);font-size:10px;color:var(--data);
+    border:1px solid var(--line);border-radius:5px;padding:2px 6px;flex:none;}
+  .stage b{color:var(--ink);}
+  .rule{display:flex;flex-direction:column;gap:10px;}
+  .rule .q{display:flex;gap:10px;align-items:flex-start;font-size:13px;}
+  .rule .q span{font-family:var(--mono);color:var(--ctrl);flex:none;}
+  footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);
+    color:var(--muted);font-size:12px;font-family:var(--mono);}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">Arquitectura de Computadores · INF60500 · Datapath ciclo único</p>
+      <h1>El recorrido de cada instrucción</h1>
+      <p class="sub">Elige una instrucción de tu programa y mira cómo viaja por los componentes físicos de la CPU: en <b style="color:var(--data)">verde</b> lo que se enciende, en gris lo que queda apagado, y en <b style="color:var(--ctrl)">ámbar</b> las señales de control que lo deciden.</p>
+    </div>
+    <div class="prog">conversor de minúsculas → mayúsculas<br><b>"holaComoEstas"</b> → <b>HOLACOMOESTAS</b></div>
+    <button class="themebtn" id="theme">◐ tema</button>
+  </header>
+
+  <div class="selector">
+    <div class="selrow" id="selrow"></div>
+  </div>
+
+  <div class="console">
+    <!-- DATAPATH BOARD -->
+    <div class="board">
+      <div class="boardhead">
+        <div class="cur" id="cur">—</div>
+      </div>
+      <div class="legend">
+        <span><i class="swatch sw-data"></i>datos activos</span>
+        <span><i class="swatch sw-ctrl"></i>señal de control</span>
+        <span><i class="swatch sw-dim"></i>inactivo</span>
+        <span><i class="swatch sw-hi"></i>tu instrucción</span>
+      </div>
+      <div class="svgbox">
+        <svg class="dp" viewBox="0 0 1080 600" role="img" aria-label="Diagrama del datapath MIPS de ciclo único">
+          <defs>
+            <marker id="ah-dim" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--dim)"/></marker>
+            <marker id="ah-data" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--data)"/></marker>
+            <marker id="ah-ctrl" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ctrl)"/></marker>
+          </defs>
+
+          <!-- ======= WIRES (draw first, under boxes) ======= -->
+          <!-- PC feedback loop (always on) -->
+          <polyline id="w_jmux_pc" class="wire" points="998,235 1020,235 1020,6 41,6 41,300"/>
+          <!-- PC -> instruction memory -->
+          <polyline id="w_pc_im" class="wire" points="56,330 92,330"/>
+          <!-- PC -> +4 adder -->
+          <polyline id="w_pc_add4" class="wire" points="56,330 70,330 70,70 150,70"/>
+          <!-- instruction bus -->
+          <polyline id="w_im_bus" class="wire" points="212,330 246,330 246,520"/>
+          <!-- opcode -> control -->
+          <polyline id="w_im_control" class="wire" points="246,50 420,50"/>
+          <!-- rs -> read reg 1 -->
+          <polyline id="w_im_rs" class="wire" points="246,300 352,300"/>
+          <!-- rt -> read reg 2 -->
+          <polyline id="w_im_rt" class="wire" points="246,336 352,336"/>
+          <!-- rt -> RegDst mux (destination for I-type) -->
+          <polyline id="w_im_rtdst" class="wire" points="246,392 316,392"/>
+          <!-- rd -> RegDst mux (destination for R-type) -->
+          <polyline id="w_im_rd" class="wire" points="246,462 300,462 300,420 316,420"/>
+          <!-- imm -> sign extend -->
+          <polyline id="w_im_imm" class="wire" points="246,492 352,492"/>
+          <!-- funct -> ALU control -->
+          <polyline id="w_im_funct" class="wire" points="246,512 556,512"/>
+          <!-- jump address -> jump mux -->
+          <polyline id="w_jaddr" class="wire" points="246,250 958,250 958,262 972,262"/>
+          <!-- RegDst mux -> write register -->
+          <polyline id="w_regdst_wr" class="wire" points="334,406 352,404"/>
+          <!-- read data 1 -> ALU top -->
+          <polyline id="w_rd1_alu" class="wire" points="492,304 534,304 534,332 558,332"/>
+          <!-- read data 2 -> ALUSrc mux (top input) -->
+          <polyline id="w_rd2_alusrc" class="wire" points="492,372 506,372 506,318 520,318"/>
+          <!-- read data 2 -> data mem write data -->
+          <polyline id="w_rd2_dmem" class="wire" points="492,372 506,372 506,438 686,438 686,392 700,392"/>
+          <!-- sign extend -> ALUSrc mux (bottom input) -->
+          <polyline id="w_signext_alusrc" class="wire" points="456,492 494,492 494,388 520,388"/>
+          <!-- sign extend -> shift left 2 -->
+          <polyline id="w_signext_sl2" class="wire" points="456,492 470,492 470,167 556,167"/>
+          <!-- ALUSrc mux -> ALU bottom -->
+          <polyline id="w_alusrc_alu" class="wire" points="538,352 548,352 548,376 558,376"/>
+          <!-- ALU result -> data mem address -->
+          <polyline id="w_alu_dmem" class="wire" points="648,354 674,354 674,340 700,340"/>
+          <!-- ALU result -> MemtoReg mux (bypass over memory) -->
+          <polyline id="w_alu_memtoreg" class="wire" points="648,354 662,354 662,252 846,252 846,330 856,330"/>
+          <!-- data mem read -> MemtoReg mux bottom -->
+          <polyline id="w_dmem_memtoreg" class="wire" points="826,340 844,340 844,392 856,392"/>
+          <!-- MemtoReg mux -> write-back loop -> registers write data -->
+          <polyline id="w_memtoreg_wb" class="wire" points="874,352 890,352 890,566 300,566 300,428 352,428"/>
+          <!-- PC+4 -> PCSrc mux (input0) -->
+          <polyline id="w_add4_pcmux" class="wire" points="202,70 202,20 966,20 966,80 972,80"/>
+          <!-- PC+4 -> branch adder -->
+          <polyline id="w_add4_addbr" class="wire" points="690,20 690,58 700,58"/>
+          <!-- shift left 2 -> branch adder -->
+          <polyline id="w_sl2_addbr" class="wire" points="616,167 660,167 660,84 700,84"/>
+          <!-- branch adder -> PCSrc mux (input1) -->
+          <polyline id="w_addbr_pcmux" class="wire" points="752,70 768,70 768,150 972,150"/>
+          <!-- PCSrc mux -> jump mux (input0) -->
+          <polyline id="w_pcmux_jmux" class="wire" points="989,144 989,180 972,214"/>
+          <!-- jr conceptual: $ra -> PC -->
+          <polyline id="w_jr_pc" class="wire dash" points="414,272 414,232 14,232 14,318 26,318"/>
+          <!-- jal conceptual: PC+4 -> registers write data -->
+          <polyline id="w_jal_ra" class="wire dash" points="202,70 214,70 214,548 330,548 330,428 352,428"/>
+
+          <!-- control stubs (amber) -->
+          <polyline id="c_regdst" class="cwire" points="440,74 380,74 380,384 325,384"/>
+          <polyline id="c_alusrc" class="cwire" points="500,74 529,74 529,300"/>
+          <polyline id="c_pcsrc" class="cwire" points="560,74 981,74 981,64"/>
+          <polyline id="c_jump" class="cwire" points="580,60 1000,60 1000,200 981,200"/>
+          <polyline id="c_dmemrw" class="cwire" points="560,74 763,74 763,306"/>
+          <polyline id="c_memtoreg" class="cwire" points="540,74 865,74 865,306"/>
+
+          <!-- ======= COMPONENTS ======= -->
+          <g class="comp" id="pc"><rect class="cbox" x="26" y="300" width="30" height="60" rx="4"/><text class="clbl" x="41" y="334">PC</text></g>
+
+          <g class="comp" id="add4"><rect class="cbox" x="150" y="44" width="52" height="52" rx="6"/><text class="clbl sm" x="176" y="66">Sumador</text><text class="clbl" x="176" y="83">+4</text></g>
+
+          <g class="comp" id="im"><rect class="cbox" x="92" y="284" width="120" height="92" rx="6"/><text class="clbl" x="152" y="322">Memoria de</text><text class="clbl" x="152" y="337">instrucciones</text><text class="plabel" x="152" y="368" text-anchor="middle">Instrucción [31-0]</text></g>
+
+          <g class="comp" id="control"><rect class="cbox" x="420" y="26" width="170" height="50" rx="24"/><text class="clbl" x="505" y="46">Unidad de</text><text class="clbl" x="505" y="60">control</text></g>
+
+          <g class="comp" id="regs"><rect class="cbox" x="352" y="272" width="140" height="160" rx="6"/><text class="clbl" x="422" y="360">Banco de</text><text class="clbl" x="422" y="374">registros</text>
+            <text class="plabel" x="358" y="298" text-anchor="start">Read reg 1</text>
+            <text class="plabel" x="358" y="334" text-anchor="start">Read reg 2</text>
+            <text class="plabel" x="358" y="402" text-anchor="start">Write reg</text>
+            <text class="plabel" x="358" y="426" text-anchor="start">Write data</text>
+            <text class="plabel" x="486" y="302" text-anchor="end">Read data 1</text>
+            <text class="plabel" x="486" y="370" text-anchor="end">Read data 2</text>
+          </g>
+
+          <g class="comp" id="mux_regdst"><rect class="cbox" x="316" y="384" width="14" height="42" rx="7"/><text class="clbl sm" x="323" y="378">RegDst</text></g>
+
+          <g class="comp" id="signext"><rect class="cbox" x="352" y="470" width="104" height="44" rx="6"/><text class="clbl" x="404" y="489">Extensor</text><text class="clbl" x="404" y="503">de signo</text></g>
+
+          <g class="comp" id="sl2"><rect class="cbox" x="556" y="150" width="60" height="34" rx="6"/><text class="clbl" x="586" y="172">&#171; 2</text></g>
+
+          <g class="comp" id="addbr"><rect class="cbox" x="700" y="44" width="52" height="52" rx="6"/><text class="clbl sm" x="726" y="66">Sumador</text><text class="clbl" x="726" y="83">+</text></g>
+
+          <g class="comp" id="mux_alusrc"><rect class="cbox" x="520" y="300" width="14" height="96" rx="7"/><text class="clbl sm" x="527" y="294">ALUSrc</text></g>
+
+          <g class="comp" id="alu"><path class="cbox" d="M558,306 L558,340 L574,354 L558,368 L558,402 L648,376 L648,332 Z"/><text class="clbl" x="596" y="358">ALU</text><text class="plabel" x="652" y="330">Zero</text></g>
+
+          <g class="comp" id="aluctrl"><rect class="cbox" x="556" y="496" width="96" height="34" rx="6"/><text class="clbl sm" x="604" y="516">ALU control</text></g>
+
+          <g class="comp" id="dmem"><rect class="cbox" x="700" y="306" width="126" height="112" rx="6"/><text class="clbl" x="763" y="360">Memoria</text><text class="clbl" x="763" y="374">de datos</text>
+            <text class="plabel" x="706" y="336" text-anchor="start">Address</text>
+            <text class="plabel" x="706" y="396" text-anchor="start">Write data</text>
+            <text class="plabel" x="820" y="336" text-anchor="end">Read data</text>
+          </g>
+
+          <g class="comp" id="mux_memtoreg"><rect class="cbox" x="856" y="306" width="14" height="96" rx="7"/><text class="clbl sm" x="863" y="300">MemtoReg</text></g>
+
+          <g class="comp" id="mux_pcsrc"><rect class="cbox" x="972" y="60" width="14" height="88" rx="7"/><text class="clbl sm" x="979" y="54">PCSrc</text></g>
+
+          <g class="comp" id="mux_jump"><rect class="cbox" x="972" y="200" width="14" height="70" rx="7"/><text class="clbl sm" x="979" y="286">Jump</text></g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="panel">
+      <div class="card">
+        <h2>32 bits de la instrucción <span class="tag" id="typeTag">—</span></h2>
+        <div class="bits" id="bits"></div>
+      </div>
+      <div class="card">
+        <h2>Señales de control</h2>
+        <div class="sigs" id="sigs"></div>
+      </div>
+      <div class="card">
+        <h2>Recorrido paso a paso</h2>
+        <ol class="steps" id="steps"></ol>
+      </div>
+      <div class="card">
+        <h2>Guion para el profe</h2>
+        <div class="guion" id="guion"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM REFERENCE -->
+  <div class="ref">
+    <div class="card">
+      <h2>Las 5 etapas del ciclo único</h2>
+      <div class="stages">
+        <div class="stage"><span class="n">1</span><div><b>Fetch.</b> El PC direcciona la memoria de instrucciones y entrega los 32 bits. <i>Siempre ocurre.</i></div></div>
+        <div class="stage"><span class="n">2</span><div><b>Decode.</b> La unidad de control lee el opcode y activa señales; el banco de registros lee <code>rs</code> y <code>rt</code>.</div></div>
+        <div class="stage"><span class="n">3</span><div><b>Execute.</b> La ALU suma, resta o compara; si hay inmediato, antes se extiende el signo.</div></div>
+        <div class="stage"><span class="n">4</span><div><b>Memory.</b> Solo <code>lbu</code>/<code>sb</code> tocan la memoria de datos.</div></div>
+        <div class="stage"><span class="n">5</span><div><b>Write-back.</b> El resultado (de la ALU o de la memoria) vuelve al banco de registros.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>La regla de oro (para responder cualquier pregunta)</h2>
+      <div class="rule">
+        <div class="q"><span>1 ·</span><div>¿Qué hace la <b>ALU</b>? (suma, resta para comparar, calcula dirección, o no la usa)</div></div>
+        <div class="q"><span>2 ·</span><div>¿Toca la <b>memoria de datos</b>? (lee = load, escribe = store, no = el resto)</div></div>
+        <div class="q"><span>3 ·</span><div>¿Escribe en un <b>registro</b>? (write-back sí/no → <code>RegWrite</code>)</div></div>
+        <p style="font-size:12.5px;color:var(--muted);margin:2px 0 0;line-height:1.5">Con esas tres respuestas se arma la ruta y las señales de <b>cualquier</b> instrucción. El profe puede preguntarte cualquiera de las seis familias, no solo tu <code>sb</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>Datapath P&amp;H de ciclo único · conversor.asm · fuente: Mapeo_Datapath.md</footer>
+</div>
+
+<script>
+const F = { // helpers para campos
+  op:(b,m)=>({rng:"31-26",bin:b,mn:m,cls:"f-op"}),
+  rs:b=>({rng:"25-21",bin:b,mn:"rs"}), rt:b=>({rng:"20-16",bin:b,mn:"rt"}),
+  rd:b=>({rng:"15-11",bin:b,mn:"rd"}), sh:()=>({rng:"10-6",bin:"00000",mn:"shamt"}),
+  fn:(b,m)=>({rng:"5-0",bin:b,mn:m}), imm:(b,m)=>({rng:"15-0",bin:b,mn:m}),
+  addr:m=>({rng:"25-0",bin:"·····",mn:m})
+};
+// señal helper
+function S(regdst,alusrc,memtoreg,regwrite,memread,memwrite,branch,jump,aluop,whys){
+  const names=["RegDst","ALUSrc","MemtoReg","RegWrite","MemRead","MemWrite","Branch","Jump","ALUOp"];
+  const vals=[regdst,alusrc,memtoreg,regwrite,memread,memwrite,branch,jump,aluop];
+  return names.map((n,i)=>({k:n,v:vals[i],why:whys[i]||""}));
+}
+const BASE=["pc","im","control","add4","mux_pcsrc","mux_jump",
+  "w_pc_im","w_pc_add4","w_im_bus","w_im_control","w_add4_pcmux","w_pcmux_jmux","w_jmux_pc"];
+
+const INSTR={
+  lbu:{asm:"lbu $t1, 0($t0)",type:"I · LOAD",grp:"Carga",
+    fields:[F.op("100100","lbu"),F.rs("01000"),F.rt("01001"),F.imm("0000000000000000","offset 0")],
+    sig:S("0","1","1","1","1","0","0","0","add",
+      ["destino = rt","2º operando = inmediato","dato viene de memoria","escribe en $t1","LEE memoria","—","—","—","suma dirección"]),
+    on:["regs","signext","mux_alusrc","alu","aluctrl","dmem","mux_memtoreg","mux_regdst",
+      "w_im_rs","w_im_rt","w_rd1_alu","w_im_imm","w_signext_alusrc","w_alusrc_alu",
+      "w_alu_dmem","w_dmem_memtoreg","w_memtoreg_wb","w_regdst_wr","w_im_rtdst",
+      "c_alusrc","c_memtoreg","c_dmemrw"],
+    steps:["<b>Fetch:</b> el PC direcciona la memoria de instrucciones y salen los 32 bits.",
+      "<b>Decode:</b> el opcode <code>100100</code> enciende MemRead, MemtoReg, RegWrite y ALUSrc; ALUOp=add.",
+      "<code>rs=$t0</code> (base) se lee → Read data 1 va a la ALU; el offset 0 pasa por el extensor de signo.",
+      "<b>ALUSrc=1:</b> el MUX toma el inmediato y la ALU suma <b>base + offset = dirección</b>.",
+      "La <b>memoria de datos lee 1 byte</b> de esa dirección (MemRead=1).",
+      "<b>MemtoReg=1:</b> el MUX toma el dato de memoria → write-back a <code>$t1</code>."],
+    guion:"El opcode 100100 le dice a Control que es un load. Lee $t0 como base, el extensor de signo lleva el offset 0 a 32 bits y la ALU suma base+offset para la dirección. La memoria de datos entrega el byte y, como MemtoReg=1 y RegWrite=1, ese byte se escribe en $t1. No hay salto ni escritura en memoria."},
+
+  sb:{asm:"sb $t1, 0($t0)",type:"I · STORE",grp:"Almacenamiento",mine:true,
+    fields:[F.op("101000","sb"),F.rs("01000"),F.rt("01001"),F.imm("0000000000000000","offset 0")],
+    sig:S("X","1","X","0","0","1","0","0","add",
+      ["no hay destino","2º operando = inmediato","no hay write-back","NO escribe registro","—","ESCRIBE memoria","—","—","suma dirección"]),
+    on:["regs","signext","mux_alusrc","alu","aluctrl","dmem",
+      "w_im_rs","w_im_rt","w_rd1_alu","w_im_imm","w_signext_alusrc","w_alusrc_alu",
+      "w_alu_dmem","w_rd2_dmem","c_alusrc","c_dmemrw"],
+    steps:["<b>Fetch:</b> PC → memoria de instrucciones → 32 bits.",
+      "<b>Decode:</b> el opcode <code>101000</code> enciende MemWrite y ALUSrc, y deja <b>RegWrite=0</b> (sin write-back).",
+      "<code>rs=$t0</code> (base) → Read data 1 → ALU. <code>rt=$t1</code> (el dato) → Read data 2.",
+      "El extensor de signo lleva el offset 0 a 32 bits; <b>ALUSrc=1</b> → la ALU suma <b>base + offset = dirección</b>.",
+      "En la memoria de datos: la dirección entra por <i>Address</i>, <code>$t1</code> por <i>Write data</i> → con <b>MemWrite=1</b> se escribe el byte.",
+      "<b>No hay retorno a los registros</b> (RegWrite=0). El PC+4 avanza en paralelo."],
+    guion:"El opcode 101000 le dice a la unidad de control que es un store, por eso enciende MemWrite y ALUSrc, y deja RegWrite en 0. rs es $t0 (la dirección base) y rt es $t1 (el dato). El sign-extend lleva el offset 0 a 32 bits, la ALU suma base+offset para obtener la dirección, y en la memoria de datos se escribe el byte de $t1. No hay write-back porque no se modifica ningún registro."},
+
+  addi:{asm:"addi $t1, $t1, -32",type:"I · ALU-inmediato",grp:"ALU-inmediato",
+    fields:[F.op("001000","addi"),F.rs("01001"),F.rt("01001"),F.imm("1111111111100000","-32")],
+    sig:S("0","1","0","1","0","0","0","0","add",
+      ["destino = rt","2º operando = inmediato","resultado de la ALU","escribe en $t1","—","—","—","—","suma"]),
+    on:["regs","signext","mux_alusrc","alu","aluctrl","mux_regdst","mux_memtoreg",
+      "w_im_rs","w_im_rtdst","w_rd1_alu","w_im_imm","w_signext_alusrc","w_alusrc_alu",
+      "w_alu_memtoreg","w_memtoreg_wb","w_regdst_wr","c_alusrc","c_regdst","c_memtoreg"],
+    steps:["<b>Fetch</b> normal.",
+      "<b>Decode:</b> opcode <code>001000</code> enciende ALUSrc y RegWrite; ALUOp=add, RegDst=0 (destino = rt).",
+      "<code>rs=$t1</code> → ALU. El inmediato <code>-32</code> pasa por el <b>extensor de signo</b>, que replica el bit de signo (queda negativo).",
+      "<b>ALUSrc=1:</b> el MUX toma el inmediato y la ALU calcula <b>$t1 + (-32)</b>.",
+      "No toca memoria; <b>MemtoReg=0</b> → el resultado de la ALU va directo al write-back.",
+      "Se escribe en <code>rt=$t1</code> (RegWrite=1). 104 ('h') − 32 = 72 ('H')."],
+    guion:"Opcode 001000: suma con inmediato. rs=$t1 entra a la ALU y el extensor de signo lleva -32 a 32 bits conservando el signo. ALUSrc=1 hace que la ALU sume $t1-32. No toca la memoria de datos; MemtoReg=0 manda el resultado directo al write-back, que lo guarda en $t1. Así convierte la 'h' (104) en 'H' (72)."},
+
+  slti:{asm:"slti $t3, $t1, 97",type:"I · ALU-inmediato",grp:"ALU-inmediato",
+    fields:[F.op("001010","slti"),F.rs("01001"),F.rt("01011"),F.imm("0000000001100001","97")],
+    sig:S("0","1","0","1","0","0","0","0","slt",
+      ["destino = rt","2º operando = inmediato","resultado de la ALU","escribe en $t3","—","—","—","—","set-less-than"]),
+    on:["regs","signext","mux_alusrc","alu","aluctrl","mux_regdst","mux_memtoreg",
+      "w_im_rs","w_im_rtdst","w_rd1_alu","w_im_imm","w_signext_alusrc","w_alusrc_alu",
+      "w_alu_memtoreg","w_memtoreg_wb","w_regdst_wr","c_alusrc","c_regdst","c_memtoreg"],
+    steps:["<b>Fetch</b> normal.",
+      "<b>Decode:</b> opcode <code>001010</code> enciende ALUSrc y RegWrite; <b>ALUOp=slt</b> (set-less-than).",
+      "<code>rs=$t1</code> → ALU; el inmediato <code>97</code> pasa por el extensor de signo → MUX (ALUSrc=1).",
+      "La ALU <b>compara</b>: si $t1 &lt; 97 entrega 1, si no 0. (Aquí 104 &lt; 97 es falso → 0.)",
+      "Sin memoria; write-back del 0/1 a <code>$t3</code>."],
+    guion:"slti es ALU con inmediato, pero la ALU no suma: hace set-less-than. Compara $t1 con 97 y deja 1 si es menor y 0 si no. Ese 0/1 se escribe en $t3 y sirve para preguntar '¿es menor que a?'. No toca la memoria de datos."},
+
+  beq:{asm:"beq $t1, $zero, fin",type:"I · BRANCH",grp:"Salto condicional",
+    fields:[F.op("000100","beq"),F.rs("01001"),F.rt("00000"),F.imm("················","offset ·4")],
+    sig:S("X","0","X","0","0","0","1","0","sub",
+      ["no hay destino","2º operando = registro","no hay write-back","no escribe","—","—","compara y salta","—","resta"]),
+    on:["regs","mux_alusrc","alu","signext","sl2","addbr",
+      "w_im_rs","w_im_rt","w_rd1_alu","w_rd2_alusrc","w_alusrc_alu",
+      "w_im_imm","w_signext_sl2","w_sl2_addbr","w_add4_addbr","w_addbr_pcmux","c_pcsrc"],
+    steps:["<b>Fetch</b> normal.",
+      "<b>Decode:</b> opcode <code>000100</code> enciende Branch; <b>ALUSrc=0</b>, ALUOp=sub. No escribe registros ni memoria.",
+      "Se leen los <b>dos operandos</b>: <code>rs=$t1</code> y <code>rt=$zero</code> (ALUSrc=0 → Read data 2 va a la ALU).",
+      "La ALU <b>resta</b> $t1 − $zero; si el resultado es 0, la señal <b>Zero=1</b>.",
+      "En paralelo: extensor de signo + <code>&#171;2</code> + sumador calculan <b>PC+4 + offset·4</b>.",
+      "<b>PCSrc = Branch AND Zero:</b> si Zero=1 el PC salta; si no, sigue PC+4. (Aquí 'h'≠0 → no salta.)"],
+    guion:"beq compara restando: ALUOp=sub. Lee $t1 y $zero, la ALU los resta y activa Zero si son iguales. En paralelo el sumador de rama calcula PC+4 + offset·4. El MUX PCSrc solo salta si Branch=1 y Zero=1. No escribe registros ni memoria."},
+
+  bne:{asm:"bne $t3, $zero, sigue",type:"I · BRANCH",grp:"Salto condicional",
+    fields:[F.op("000101","bne"),F.rs("01011"),F.rt("00000"),F.imm("················","offset ·4")],
+    sig:S("X","0","X","0","0","0","1","0","sub",
+      ["no hay destino","2º operando = registro","no hay write-back","no escribe","—","—","salta si Zero=0","—","resta"]),
+    on:["regs","mux_alusrc","alu","signext","sl2","addbr",
+      "w_im_rs","w_im_rt","w_rd1_alu","w_rd2_alusrc","w_alusrc_alu",
+      "w_im_imm","w_signext_sl2","w_sl2_addbr","w_add4_addbr","w_addbr_pcmux","c_pcsrc"],
+    steps:["<b>Mismo hardware que beq.</b> Fetch y decode iguales; opcode <code>000101</code>.",
+      "Lee <code>rs=$t3</code> y <code>rt=$zero</code>; la ALU resta para comparar → señal Zero.",
+      "El sumador de rama calcula PC+4 + offset·4 en paralelo.",
+      "<b>Condición invertida:</b> bne salta cuando <b>Zero=0</b> (los valores son <b>distintos</b>).",
+      "Aquí comprueba si <code>$t3 ≠ 0</code> para saltar a <code>sigue</code>."],
+    guion:"bne recorre el mismo hardware que beq: resta y mira la señal Zero. La diferencia es la condición: salta cuando Zero=0, es decir cuando los valores son distintos. Aquí comprueba si $t3 es distinto de 0 para saltar a 'sigue'. Tampoco escribe registros ni memoria."},
+
+  move:{asm:"move $t0, $a0   → addu",type:"R · registro-registro",grp:"R-type",
+    fields:[F.op("000000","R"),F.rs("00000"),F.rt("00100"),F.rd("01000"),F.sh(),F.fn("100001","addu")],
+    sig:S("1","0","0","1","0","0","0","0","funct",
+      ["destino = rd","2º operando = registro","resultado de la ALU","escribe en $t0","—","—","—","—","lo decide funct"]),
+    on:["regs","mux_alusrc","alu","aluctrl","mux_regdst","mux_memtoreg",
+      "w_im_rs","w_im_rt","w_rd1_alu","w_rd2_alusrc","w_alusrc_alu","w_im_rd",
+      "w_alu_memtoreg","w_memtoreg_wb","w_regdst_wr","w_im_funct","c_regdst","c_memtoreg"],
+    steps:["<b>Fetch</b> normal.",
+      "<b>Decode:</b> opcode <code>000000</code> = R-type. <b>RegDst=1</b>, ALUSrc=0, RegWrite=1; ALUOp=funct.",
+      "La <b>ALU control</b> lee el campo <code>funct=100001</code> (addu) para saber que debe sumar.",
+      "Se leen <code>rs=$zero</code> y <code>rt=$a0</code>; <b>ALUSrc=0</b> → Read data 2 va directo a la ALU.",
+      "La ALU suma <b>$zero + $a0 = $a0</b>.",
+      "<b>RegDst=1:</b> el destino es <code>rd=$t0</code>; MemtoReg=0 → write-back a <code>$t0</code>."],
+    guion:"move es en realidad addu $t0,$zero,$a0. Opcode 000000 = R-type: RegDst=1 y ALUSrc=0. La ALU control usa el campo funct (100001) para sumar. La ALU suma $a0+$zero y el resultado se escribe en rd=$t0. Copia el puntero sin tocar la memoria de datos."},
+
+  jr:{asm:"jr $ra",type:"R · jump register",grp:"R-type",
+    fields:[F.op("000000","R"),F.rs("11111"),F.rt("00000"),F.rd("00000"),F.sh(),F.fn("001000","jr")],
+    sig:S("X","X","X","0","0","0","0","0","funct",
+      ["—","—","—","NO escribe registro","—","—","—","—","funct = jr"]),
+    on:["regs","w_im_rs","w_jr_pc"],
+    steps:["<b>Fetch</b> normal.",
+      "<b>Decode:</b> opcode <code>000000</code> con <code>funct=001000</code> (jr). RegWrite=0: no escribe registros.",
+      "Se lee <code>rs=$ra</code> en el banco de registros.",
+      "Ese valor se carga <b>directo en el PC</b>: la próxima instrucción es la de retorno en <code>main</code>.",
+      "No usa la ALU para un resultado, ni memoria, ni write-back."],
+    guion:"jr es R-type con funct 001000. Lee $ra y ese valor se mete directo en el PC, así que la siguiente instrucción es la dirección de retorno guardada por jal. No escribe registros ni memoria: solo cambia el PC."},
+
+  j:{asm:"j bucle",type:"J · salto incondicional",grp:"Salto incondicional",
+    fields:[F.op("000010","j"),F.addr("dirección · 4")],
+    sig:S("X","X","X","0","0","0","0","1","X",
+      ["—","—","—","no escribe","—","—","—","salto directo","—"]),
+    on:["w_jaddr","c_jump"],
+    steps:["<b>Fetch</b> normal.",
+      "<b>Decode:</b> opcode <code>000010</code> enciende <b>Jump=1</b>; el resto de señales apagadas.",
+      "La dirección de <b>26 bits</b> de la instrucción se desplaza <code>&#171;2</code> y se concatena con los bits altos de PC+4.",
+      "El <b>MUX de jump</b> toma esa dirección → PC. No se leen registros, ni ALU, ni memoria."],
+    guion:"j es salto incondicional. Opcode 000010, Jump=1. La dirección viene de la propia instrucción (26 bits, multiplicados por 4). El MUX de jump la carga en el PC. No usa registros, ALU ni memoria: solo redirige el PC al inicio del bucle."},
+
+  jal:{asm:"jal transformar",type:"J · jump-and-link",grp:"Salto incondicional",
+    fields:[F.op("000011","jal"),F.addr("dirección · 4")],
+    sig:S("X","X","X","1","0","0","0","1","X",
+      ["—","—","PC+4 → $ra","escribe $ra","—","—","—","salto directo","—"]),
+    on:["regs","w_jaddr","w_jal_ra","c_jump"],
+    steps:["<b>Fetch</b> normal.",
+      "<b>Decode:</b> opcode <code>000011</code> enciende <b>Jump=1</b> y <b>RegWrite=1</b> (única diferencia con <code>j</code>).",
+      "Igual que <code>j</code>: la dirección de 26 bits ·4 se carga en el PC.",
+      "<b>Además guarda PC+4</b> (la dirección de retorno) en <code>$ra</code>, para poder volver con <code>jr</code>."],
+    guion:"jal es como j pero además enlaza: guarda PC+4 en $ra (RegWrite=1) para poder volver con jr. Salta a 'transformar' cargando el PC con la dirección de la instrucción. Por eso es la única J-type que escribe un registro."},
+};
+
+// ---- build selector grouped ----
+const GROUPS=["Carga","Almacenamiento","ALU-inmediato","Salto condicional","R-type","Salto incondicional"];
+const selrow=document.getElementById("selrow");
+GROUPS.forEach(g=>{
+  const div=document.createElement("div");div.className="grp";
+  div.innerHTML=`<h3>${g}</h3><div class="chips"></div>`;
+  const cont=div.querySelector(".chips");
+  Object.keys(INSTR).forEach(k=>{
+    if(INSTR[k].grp!==g)return;
+    const b=document.createElement("button");
+    b.className="chip"+(INSTR[k].mine?" mine":"");
+    b.textContent=INSTR[k].asm.split(" ")[0]+" "+(INSTR[k].asm.split(" ").slice(1).join(" ")||"");
+    b.dataset.k=k;b.setAttribute("aria-pressed","false");
+    b.onclick=()=>select(k);
+    cont.appendChild(b);
+  });
+  selrow.appendChild(div);
+});
+
+// ---- collect every svg id we can toggle ----
+const ALLIDS=[];
+document.querySelectorAll("svg .wire,svg .cwire,svg .comp").forEach(el=>{if(el.id)ALLIDS.push(el.id);});
+
+function select(k){
+  const d=INSTR[k];
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.k===k?"true":"false"));
+  document.getElementById("cur").innerHTML=`${d.asm} &nbsp;<small>· ${d.type}</small>`;
+  document.getElementById("typeTag").textContent=d.type;
+
+  // svg lighting
+  const active=new Set([...BASE,...d.on]);
+  ALLIDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.classList.toggle("on",active.has(id));
+  });
+
+  // fields
+  document.getElementById("bits").innerHTML=d.fields.map(f=>
+    `<div class="field ${f.cls||""}" style="flex-grow:${(f.bin&&f.bin.length)||f.mn.length}">
+       <div class="rng">${f.rng}</div><div class="bin">${f.bin}</div><div class="mn">${f.mn}</div></div>`).join("");
+
+  // signals
+  document.getElementById("sigs").innerHTML=d.sig.map(s=>{
+    let cls="v0";if(s.k==="ALUOp")cls="vi";else if(s.v==="1")cls="v1";else if(s.v==="X")cls="vx";
+    return `<div class="sig"><div class="nm">${s.k}<span class="val ${cls}">${s.v}</span></div><div class="why">${s.why}</div></div>`;
+  }).join("");
+
+  // steps
+  document.getElementById("steps").innerHTML=d.steps.map(s=>`<li>${s}</li>`).join("");
+  // guion
+  document.getElementById("guion").textContent=d.guion;
+}
+
+// theme toggle
+const root=document.documentElement;
+document.getElementById("theme").onclick=()=>{
+  const cur=root.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+  root.setAttribute("data-theme",cur==="dark"?"light":"dark");
+};
+
+select("sb"); // arranca en tu instrucción
+</script>
